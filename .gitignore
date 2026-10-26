@@ -1,0 +1,6 @@
+.godot/
+export/
+*.o
+test_core
+sim_pc
+.DS_Store
