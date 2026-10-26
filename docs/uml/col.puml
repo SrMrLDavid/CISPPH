@@ -1,0 +1,16 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+object "Guarda" as G
+object "Interfaz" as I
+object "Sistema" as S
+object "Usuarios" as U
+object "Movimientos" as M
+G -down-> I : 1: digitarPlaca()
+I -down-> S : 2: evaluarAcceso(placa)
+S -right-> U : 3: buscarPorPlaca()
+S -right-> M : 4: registrarMovimiento()
+S -up-> I : 5: resultado
+I -up-> G : 6: mostrar decisión
+@enduml

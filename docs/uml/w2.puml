@@ -1,0 +1,15 @@
+@startsalt
+skinparam dpi 140
+{+
+  <b>C.I.S.P.P.H. — Administración
+  { /Usuarios | Historial | Puestos | Reporte }
+  --
+  { Buscar: | "              " | [Filtrar] }
+  {#
+   Placa | Nombre | Rol | Categoría | Puesto
+   ABC-123 | Carlos R. | residente | No VIP | R-01
+   JKL-012 | Juan P. | visitante | VIS | V-01
+  }
+  { [Nuevo usuario] | [Editar] | [Exportar] }
+}
+@endsalt

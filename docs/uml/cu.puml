@@ -1,0 +1,38 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+left to right direction
+actor "Guarda de seguridad" as G
+actor "Administrador" as A
+actor "Visitante" as V
+rectangle "C.I.S.P.P.H." {
+  usecase "CU-001 Iniciar sesión" as C1
+  usecase "CU-002 Registrar ingreso" as C2
+  usecase "CU-003 Registrar salida" as C3
+  usecase "CU-004 Gestionar vehículos" as C4
+  usecase "CU-005 Autorizar visita" as C5
+  usecase "CU-006 Consultar disponibilidad" as C6
+  usecase "CU-007 Consultar historial" as C7
+  usecase "CU-008 Asignar parqueadero" as C8
+  usecase "CU-009 Generar reporte" as C9
+  usecase "CU-010 Cerrar sesión" as C10
+}
+G --> C2
+G --> C3
+G --> C6
+A --> C4
+A --> C5
+A --> C7
+A --> C8
+A --> C9
+G --> C1
+A --> C1
+G --> C10
+A --> C10
+C2 .> C1 : <<include>>
+C3 .> C1 : <<include>>
+C4 .> C1 : <<include>>
+C7 .> C1 : <<include>>
+V ..> C2 : (es registrado)
+@enduml

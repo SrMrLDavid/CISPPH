@@ -1,0 +1,26 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+title TO-BE (propuesta): registro con C.I.S.P.P.H.
+|Conductor|
+start
+:Llega a la garita;
+|Guarda|
+:Digita placa en el sistema;
+|Sistema|
+:Evalúa autorización y cupo;
+if (¿Autorizado y con puesto?) then (sí)
+  :Asigna puesto y registra ingreso;
+  |Guarda|
+  :Abre la barrera;
+else (no)
+  |Guarda|
+  :Revisa y decide; 
+  |Sistema|
+  :Registra la decisión;
+endif
+|Conductor|
+:Ingresa o espera;
+stop
+@enduml

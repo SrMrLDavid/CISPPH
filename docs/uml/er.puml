@@ -1,0 +1,60 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+hide circle
+entity USUARIO {
+ * id : int <<PK>>
+ --
+ rol : varchar
+ tipo_id : varchar
+ cedula : varchar <<UK>>
+ nombre : varchar
+ apellido : varchar
+ vip : boolean
+ activo : boolean
+ fecha_registro : datetime
+}
+entity VEHICULO {
+ * placa : varchar <<PK>>
+ --
+ id_usuario : int <<FK>>
+ tipo : varchar
+ color : varchar
+}
+entity PUESTO {
+ * codigo : varchar <<PK>>
+ --
+ tipo : varchar
+ id_usuario_asignado : int <<FK>>
+}
+entity AUTORIZACION {
+ * id : int <<PK>>
+ --
+ id_usuario : int <<FK>>
+ autorizado_por : varchar
+ motivo : varchar
+ activa : boolean
+}
+entity MOVIMIENTO {
+ * id : int <<PK>>
+ --
+ id_usuario : int <<FK>>
+ placa : varchar
+ puesto : varchar <<FK>>
+ sentido : varchar
+ decision : varchar
+ fecha : datetime
+ registrado_por : varchar
+}
+entity ADMIN {
+ * usuario : varchar <<PK>>
+ --
+ hash_clave : varchar
+}
+USUARIO ||--o{ VEHICULO
+USUARIO ||--o| AUTORIZACION
+USUARIO ||--o{ MOVIMIENTO
+PUESTO |o--o{ MOVIMIENTO
+USUARIO |o--o| PUESTO
+@enduml

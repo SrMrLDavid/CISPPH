@@ -1,0 +1,27 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+object "u1 : Usuario" as u1 {
+ rol = residente
+ nombre = Carlos
+ apellido = Rodríguez
+ vip = false
+}
+object "v1 : Vehiculo" as v1 {
+ placa = ABC-123
+ tipo = sedán
+}
+object "p1 : Puesto" as p1 {
+ codigo = R-01
+ tipo = residente
+}
+object "m1 : Movimiento" as m1 {
+ sentido = Entrada
+ decision = permitido
+}
+u1 -- v1
+u1 -- p1
+u1 -- m1
+m1 -- p1
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+node "Equipo del guarda (PC)" {
+  component "Interfaz (escenas Godot)" as UI
+  component "Sistema (reglas)" as SYS
+  database "cispph_datos.json" as DB
+}
+node "Garita (prototipo)" {
+  component "Lógica portable C++" as LOG
+  component "Lector MFRC522" as RFID
+  component "Servo / LCD / buzzer" as ACT
+}
+UI --> SYS
+SYS --> DB
+RFID --> LOG
+LOG --> ACT
+@enduml

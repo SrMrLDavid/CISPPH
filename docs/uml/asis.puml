@@ -1,0 +1,22 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+title AS-IS (hipótesis): registro manual
+|Conductor|
+start
+:Llega a la garita;
+|Guarda|
+:Pregunta quién es y a dónde va;
+:Anota la placa en el libro;
+if (¿Es visitante?) then (sí)
+  :Llama al apartamento;
+  :Espera la autorización verbal;
+else (no)
+  :Reconoce al residente;
+endif
+:Levanta la barrera;
+|Conductor|
+:Ingresa;
+stop
+@enduml

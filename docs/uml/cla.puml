@@ -1,0 +1,52 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+skinparam classAttributeIconSize 0
+class Usuario {
+ -id : int
+ -rol : String
+ -nombre : String
+ -apellido : String
+ -cedula : String
+ -vip : boolean
+ -activo : boolean
+ +categoria() : String
+}
+class Vehiculo {
+ -placa : String
+ -tipo : String
+ -color : String
+}
+class Puesto {
+ -codigo : String
+ -tipo : String
+ +estaLibre() : boolean
+}
+class Movimiento {
+ -id : int
+ -sentido : String
+ -fecha : DateTime
+ -decision : String
+ -detalle : String
+}
+class Autorizacion {
+ -autorizadoPor : String
+ -motivo : String
+ -activa : boolean
+}
+class Sistema {
+ +evaluarAcceso() : Resultado
+ +registrarMovimiento() : Movimiento
+ +registrarUsuario() : Usuario
+ +validarLogin() : boolean
+}
+Usuario "1" -- "0..*" Vehiculo : posee
+Usuario "1" -- "0..1" Autorizacion : tiene
+Usuario "0..1" -- "0..1" Puesto : ocupa/asignado
+Usuario "1" -- "0..*" Movimiento : genera
+Movimiento "0..*" -- "0..1" Puesto
+Sistema ..> Usuario
+Sistema ..> Movimiento
+Sistema ..> Puesto
+@enduml

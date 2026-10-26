@@ -1,0 +1,10 @@
+@startsalt
+skinparam dpi 140
+{+
+  <b>Inicio de sesión
+  { Usuario: | "admin      " }
+  { Clave: | "********    " }
+  [ Ingresar ]
+  <color:red>Credenciales inválidas (intento 1 de 3)
+}
+@endsalt

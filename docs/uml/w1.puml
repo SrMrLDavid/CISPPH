@@ -1,0 +1,16 @@
+@startsalt
+skinparam dpi 140
+{+
+  <b>C.I.S.P.P.H. — Garita
+  --
+  { Placa: | "ABC-123    " | [Consultar] }
+  { Sentido: | (X) Entrada | () Salida }
+  ..
+  { Resultado: | <color:green><b>AUTORIZADO</b></color> }
+  { Puesto: | R-01 | Categoría: | No VIP }
+  ..
+  { [Registrar] | [Revisar] | [Denegar] }
+  --
+  { Puestos libres: | R: 17/25 | V: 5/5 }
+}
+@endsalt

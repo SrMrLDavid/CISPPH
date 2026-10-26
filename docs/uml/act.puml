@@ -1,0 +1,34 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+|Guarda|
+start
+:Llega un vehículo a la garita;
+:Digita la placa;
+|Sistema|
+if (¿Placa vacía o inválida?) then (sí)
+  :Rechaza y pide corregir;
+  |Guarda|
+  stop
+else (no)
+endif
+:Busca la placa en usuarios registrados;
+if (¿Registrada y autorizada?) then (sí)
+  if (¿Hay puesto libre?) then (sí)
+    :Asigna puesto;
+    :Registra ingreso (placa, fecha-hora, usuario);
+    |Guarda|
+    :Permite el ingreso;
+  else (no)
+    :Registra denegado por falta de cupo;
+    |Guarda|
+    :Informa al conductor;
+  endif
+else (no)
+  :Marca "revisar";
+  |Guarda|
+  :Decide manualmente o consulta;
+endif
+stop
+@enduml

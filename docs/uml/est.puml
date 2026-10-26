@@ -1,0 +1,10 @@
+@startuml
+skinparam dpi 140
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+[*] --> Libre
+Libre --> Ocupado : ingreso permitido
+Ocupado --> Libre : salida permitida
+Ocupado --> Ocupado : ingreso denegado\n(no cambia)
+note right of Ocupado : Un puesto de visitante\nno se reserva a un apartamento
+@enduml
