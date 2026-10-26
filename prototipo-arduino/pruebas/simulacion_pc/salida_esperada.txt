@@ -1,0 +1,59 @@
+  [servo] 0 grados
+SERIAL> ms,uid,sentido,decision,categoria,visitantes_ocupados
+  [LCD] Acerque tarjeta  | Visit. 0/5
+
+== ENTRADA DEADBE01
+SERIAL> 0,DEADBE01,ENTRADA,AUTORIZADO,No VIP,0
+  [LCD] AUTORIZADO       | No VIP
+  [buzzer]
+  [servo] 90 grados
+  [servo] 0 grados
+  [LCD] Acerque tarjeta  | Visit. 0/5
+
+== ENTRADA DEADBE02
+SERIAL> 3340,DEADBE02,ENTRADA,AUTORIZADO,VIS,1
+  [LCD] AUTORIZADO       | VIS
+  [buzzer]
+  [servo] 90 grados
+  [servo] 0 grados
+  [LCD] Acerque tarjeta  | Visit. 1/5
+
+== SALIDA DEADBE02
+SERIAL> 6680,DEADBE02,SALIDA,AUTORIZADO,VIS,0
+  [LCD] AUTORIZADO       | VIS
+  [buzzer]
+  [servo] 90 grados
+  [servo] 0 grados
+  [LCD] Acerque tarjeta  | Visit. 0/5
+
+== ENTRADA 00000000
+SERIAL> 10020,00000000,ENTRADA,TARJETA INVALIDA,-,0
+  [LCD] TARJETA INVALIDA | -
+  [buzzer]
+  [buzzer]
+  [buzzer]
+  [LCD] Acerque tarjeta  | Visit. 0/5
+
+== ENTRADA 00000000
+SERIAL> 12340,00000000,ENTRADA,TARJETA INVALIDA,-,0
+  [LCD] TARJETA INVALIDA | -
+  [buzzer]
+  [buzzer]
+  [buzzer]
+  [LCD] Acerque tarjeta  | Visit. 0/5
+
+== ENTRADA 00000000
+SERIAL> 14660,00000000,ENTRADA,TARJETA INVALIDA,-,0
+  [LCD] TARJETA INVALIDA | -
+  [buzzer]
+  [buzzer]
+  [buzzer]
+  [LCD] Acerque tarjeta  | Visit. 0/5
+
+== ENTRADA DEADBE01
+SERIAL> 16980,DEADBE01,ENTRADA,LECTOR BLOQUEADO,-,0
+  [LCD] LECTOR BLOQUEADO | -
+  [buzzer]
+  [buzzer]
+  [buzzer]
+  [LCD] Acerque tarjeta  | Visit. 0/5
