@@ -1,0 +1,572 @@
+<title>CISPPH Parqueaderos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Concepto: página de producto tipo "fintech": fondo claro, titulares grandes, tarjetas limpias; el simulador es el protagonista. */
+:root{
+  --bg:#f6f9fc; --surface:#ffffff; --ink:#0a2540; --mute:#4f6074; --line:#e0e7ef;
+  --acc:#4a5af0; --acc2:#12b5a3; --acc-ink:#ffffff; --soft:#eef1fe;
+  --ok:#0b7a52; --okbg:#dff5ea; --warn:#8a5a00; --warnbg:#fdf0cf; --bad:#b4232c; --badbg:#fbe3e3;
+  --night:#0a2540; --road:#3b4658; --grass:#dfeee4; --lot:#cfd8e3; --spot:#e9eef5; --spotln:#9fb0c4;
+  --f-d:'Sora',system-ui,sans-serif; --f-b:'Public Sans',system-ui,sans-serif; --f-m:'JetBrains Mono',ui-monospace,monospace;
+  --sh:0 1px 2px rgba(10,37,64,.06),0 8px 24px rgba(10,37,64,.07);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1422; --surface:#122036; --ink:#e8eef7; --mute:#9db0c8; --line:#223350; --acc:#8f9bff; --acc2:#3fd6c4; --acc-ink:#0b1422; --soft:#1a2748;
+  --ok:#6fe0ae; --okbg:#0f3a2b; --warn:#f2c35a; --warnbg:#3b2f10; --bad:#ff9b9b; --badbg:#4a1d22;
+  --night:#060c16; --road:#2a3345; --grass:#12261c; --lot:#1b2840; --spot:#23324d; --spotln:#4d6286; --sh:0 1px 2px #0006,0 8px 24px #0005; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1422; --surface:#122036; --ink:#e8eef7; --mute:#9db0c8; --line:#223350; --acc:#8f9bff; --acc2:#3fd6c4; --acc-ink:#0b1422; --soft:#1a2748;
+  --ok:#6fe0ae; --okbg:#0f3a2b; --warn:#f2c35a; --warnbg:#3b2f10; --bad:#ff9b9b; --badbg:#4a1d22;
+  --night:#060c16; --road:#2a3345; --grass:#12261c; --lot:#1b2840; --spot:#23324d; --spotln:#4d6286; --sh:0 1px 2px #0006,0 8px 24px #0005; color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--f-b);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+.w{max-width:1120px;margin:0 auto}
+a{color:var(--acc)} a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-d);letter-spacing:-.02em;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1.04;font-weight:700}
+h2{font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.15;font-weight:700;margin-bottom:12px}
+h3{font-size:1.1rem;line-height:1.3;font-weight:700;margin-bottom:6px}
+p{margin:0 0 14px;max-width:66ch}.mute{color:var(--mute)}.small{font-size:.9rem}
+.eyebrow{font:600 .78rem var(--f-b);letter-spacing:.12em;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+/* barra */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .w{display:flex;align-items:center;gap:6px;padding-block:10px;flex-wrap:wrap}
+.logo{font:700 1.05rem var(--f-d);margin-right:auto;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo i{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:inline-block}
+.top a.l{color:var(--mute);text-decoration:none;font-weight:500;font-size:.95rem;padding:6px 10px;border-radius:8px}.top a.l:hover{color:var(--ink);background:var(--soft)}
+@media(max-width:760px){.top a.l.x{display:none}}
+.btn{font:600 .95rem var(--f-b);padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.btn:hover{border-color:var(--acc)} .btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.p{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)} .btn.p:hover{filter:brightness(1.08)}
+.btn.s{padding:7px 11px;font-size:.88rem;border-radius:8px}
+.btn.g{background:var(--okbg);color:var(--ok);border-color:transparent}.btn.r{background:var(--badbg);color:var(--bad);border-color:transparent}
+/* héroe */
+.hero{position:relative;padding-block:72px 56px}
+.hero{background:radial-gradient(55% 75% at 85% 15%,color-mix(in srgb,var(--acc) 20%,transparent),transparent 72%),radial-gradient(40% 60% at 100% 75%,color-mix(in srgb,var(--acc2) 22%,transparent),transparent 70%)}
+.hero p.lead{font-size:1.2rem;color:var(--mute);margin:18px 0 26px;max-width:58ch}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.chip{font:500 .85rem var(--f-b);padding:5px 12px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--mute)}
+section{padding-block:56px;scroll-margin-top:60px}
+.band{position:relative;isolation:isolate}.band::before{content:"";position:absolute;inset:0 -100vmax;background:var(--surface);border-block:1px solid var(--line);z-index:-1}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--sh);min-width:0}
+.band .card{box-shadow:none;background:var(--bg)}
+.num{font:700 .8rem var(--f-m);color:var(--acc);display:block;margin-bottom:8px}
+.pill{display:inline-block;font:600 .78rem var(--f-b);padding:2px 10px;border-radius:99px}
+.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.bad{background:var(--badbg);color:var(--bad)}.neu{background:var(--soft);color:var(--acc)}
+table{border-collapse:collapse;width:100%;font-size:.95rem}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{font-weight:600;color:var(--mute);font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+code{white-space:nowrap;font-family:var(--f-m);font-size:.86em;background:var(--soft);padding:1px 6px;border-radius:5px}
+pre{font:500 .85rem var(--f-m);background:var(--night);color:#d7e3f4;border-radius:12px;padding:16px;overflow-x:auto;margin:12px 0}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:8px}
+/* arquitectura */
+.arch{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;margin-top:24px}
+.arch .card{text-align:center;padding:16px}.arch .ar{color:var(--mute);font-size:1.4rem;text-align:center}
+@media(max-width:760px){.arch{grid-template-columns:1fr}.arch .ar{transform:rotate(90deg)}}
+/* simulador */
+.simbox{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:14px}
+.hud{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:.82rem;line-height:1.25}.kpi b{display:block;font:700 1.05rem var(--f-m);font-variant-numeric:tabular-nums}
+.simgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+@media(max-width:900px){.simgrid{grid-template-columns:1fr}}
+#mapa{width:100%;height:auto;border-radius:12px;display:block;background:var(--grass);border:1px solid var(--line)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.ctl label{font-size:.88rem;display:flex;gap:6px;align-items:center;color:var(--mute)}
+.ctl input[type=checkbox]{accent-color:var(--acc);width:16px;height:16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}.seg button{border:0;border-radius:0;padding:7px 12px;background:var(--surface);color:var(--mute);font:600 .85rem var(--f-b);cursor:pointer}.seg button[aria-pressed=true]{background:var(--acc);color:var(--acc-ink)}
+.panel{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;min-height:300px}
+.fotos{display:grid;grid-template-columns:1fr 1fr 74px;gap:8px;margin:10px 0}
+.foto{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center;font-size:.7rem;color:var(--mute)}
+.placa{font:700 .95rem var(--f-m);background:#f8d84a;color:#16202c;border:2px solid #16202c;border-radius:5px;padding:2px 4px;margin-top:3px;letter-spacing:.05em}
+.veredicto{border-radius:10px;padding:10px 12px;font-weight:600;margin-block:8px}
+.veredicto small{display:block;font-weight:400;color:inherit;opacity:.9}
+.chk{list-style:none;margin:8px 0;padding:0;font-size:.88rem}.chk li{display:flex;gap:8px;padding:3px 0}.chk b{width:18px;flex:none;font-family:var(--f-m)}.chk .y b{color:var(--ok)}.chk .n b{color:var(--bad)}.chk .q b{color:var(--mute)}
+.dec{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.note{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:.9rem;margin-top:8px}
+.vacio{color:var(--mute);text-align:center;padding:60px 10px}
+.apag{background:var(--badbg);color:var(--bad);border-radius:8px;padding:6px 10px;font-weight:600;font-size:.88rem;margin-bottom:8px}
+.hist{max-height:230px;overflow:auto;font-size:.85rem}.hist table{font-size:.82rem}.hist th,.hist td{padding:6px 8px}
+.toast{position:fixed;bottom:max(16px,env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--night);color:#fff;padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:40;max-width:90vw;box-shadow:var(--sh)}
+footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px solid var(--line)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+<header class="top"><div class="w">
+  <a class="logo" href="#inicio"><i></i>CISPPH</a>
+  <a class="l x" href="#como">Cómo funciona</a><a class="l x" href="#simulador">Simulador</a><a class="l x" href="#sistemas">Sistemas</a><a class="l x" href="#documentos">Documentos</a><a class="l x" href="#github">GitHub</a><a class="l" href="#equipo">Equipo</a>
+  <button class="btn s" id="tema" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
+</div></header>
+
+<main class="w">
+<section class="hero" id="inicio">
+  <div class="eyebrow">Proyecto de Diseño de Software I · ETITC</div>
+  <h1>Cada entrada y salida del parqueadero, registrada y bajo las mismas reglas.</h1>
+  <p class="lead">CISPPH ayuda al guarda de un conjunto residencial a decidir quién entra y quién sale, y deja un historial de todo lo que pasa. Aquí puede ver cómo funciona y probarlo.</p>
+  <div class="row"><a class="btn p" href="#simulador">Probar el simulador</a><a class="btn" href="#como">Ver cómo funciona</a><a class="btn" href="https://github.com/SrMrLDavid/cispph">Código en GitHub</a></div>
+  <div class="chips"><span class="chip">Cliente ficticio: Robles del Norte P.H.</span><span class="chip">Simulador + sistema en Python + prototipo Arduino</span><span class="chip">Documentos en APA 7</span></div>
+</section>
+
+<section id="problema">
+  <div class="eyebrow">El problema</div>
+  <h2>Hoy, mucho de este control se hace a mano.</h2>
+  <p>En muchos conjuntos el guarda mira la placa, pregunta por el visitante y anota todo en un cuaderno. Eso genera filas, errores al escribir y poca claridad: después nadie sabe con certeza quién entró, a qué hora y quién lo autorizó.</p>
+  <p class="mute small">Es una hipótesis de trabajo del equipo. No hubo observación en un conjunto real, porque el caso es ficticio.</p>
+</section>
+
+<section id="como" class="band"><div class="w">
+  <div class="eyebrow">Cómo funciona</div>
+  <h2>Cuatro pasos, siempre los mismos.</h2>
+  <div class="grid">
+    <div class="card"><span class="num">PASO 1</span><h3>Identifica</h3><p class="mute">Lee la placa, la tarjeta y el rostro de quien llega.</p></div>
+    <div class="card"><span class="num">PASO 2</span><h3>Revisa las reglas</h3><p class="mute">Categoría, turno, cupo de visitantes, si ya está dentro.</p></div>
+    <div class="card"><span class="num">PASO 3</span><h3>Responde</h3><p class="mute"><span class="pill ok">Autorizado</span> <span class="pill warn">Revisar</span> <span class="pill bad">Denegado</span></p></div>
+    <div class="card"><span class="num">PASO 4</span><h3>Actúa y registra</h3><p class="mute">Abre la pluma si corresponde y guarda el movimiento con fecha, hora y quién decidió.</p></div>
+  </div>
+  <h3 style="margin-top:34px">Las reglas del sistema</h3>
+  <div class="scroll" style="margin-top:12px"><table>
+    <tr><th>Regla</th><th>Qué significa</th></tr>
+    <tr><td>Categorías</td><td>No VIP (residente), VIS (visitante) y VIP. Son definiciones de trabajo que el cliente debe confirmar.</td></tr>
+    <tr><td>Cupo de visitantes</td><td>Los visitantes comparten un número limitado de puestos; no se reservan a un apartamento. Sin puesto libre, se deniega.</td></tr>
+    <tr><td>Sin doble entrada ni doble salida</td><td>Quien ya está dentro no puede entrar otra vez; quien está fuera no puede salir.</td></tr>
+    <tr><td>Casos dudosos</td><td>Si algo no cuadra (rostro, vehículo, placa, turno, autorización), el sistema no decide: decide el guarda.</td></tr>
+    <tr><td>Intentos fallidos</td><td>Tres intentos seguidos con la contraseña equivocada bloquean el acceso un momento.</td></tr>
+    <tr><td>Historial</td><td>Toda decisión queda guardada, también las denegadas, con quién la tomó.</td></tr>
+  </table></div>
+  <p class="mute small" style="margin-top:12px">Tarifas, minutos de gracia y cobros no están definidos en este proyecto.</p>
+</div></section>
+
+<section id="simulador">
+  <div class="eyebrow">Simulador</div>
+  <h2>Sea el guarda por unos minutos.</h2>
+  <p>Es la versión ligera del simulador 3D hecho en Godot. Tiene las mismas reglas: llegan vehículos, usted revisa las pruebas y decide. Los casos dudosos nunca se deciden solos.</p>
+  <div class="simbox" id="sim">
+    <div class="hud" id="hud"></div>
+    <div class="simgrid">
+      <div>
+        <canvas id="mapa" width="760" height="330" role="img" aria-label="Mapa del parqueadero con garita, barreras y 40 puestos"></canvas>
+        <div class="ctl">
+          <button class="btn p s" id="bEnt">Generar entrada</button>
+          <button class="btn s" id="bSal">Generar salida</button>
+          <span class="seg" role="group" aria-label="Modo de decisión"><button id="mMan" aria-pressed="false">Manual</button><button id="mAut" aria-pressed="true">Automático</button></span>
+          <span class="seg" role="group" aria-label="Velocidad"><button id="v1" aria-pressed="true">×1</button><button id="v2" aria-pressed="false">×2</button></span>
+        </div>
+        <div class="ctl">
+          <label><input type="checkbox" id="cLleg"> Llegadas automáticas</label>
+          <label><input type="checkbox" id="cErr"> Error de conexión (7 %)</label>
+          <button class="btn s" id="bApag">Provocar apagón</button>
+          <button class="btn s" id="bReset">Reiniciar</button>
+        </div>
+      </div>
+      <div class="panel" id="panel"><div class="vacio">Pulse <b>Generar entrada</b> para que llegue el primer vehículo.</div></div>
+    </div>
+    <div class="row" style="justify-content:space-between;margin-top:14px"><h3 style="margin:0">Historial</h3><span class="row"><button class="btn s" id="bMet">Ver métricas</button><button class="btn s" id="bCopy">Copiar historial</button></span></div>
+    <div class="hist scroll" style="margin-top:8px" id="hist"></div>
+    <div id="metr" hidden class="card" style="margin-top:10px;box-shadow:none"></div>
+  </div>
+  <details style="margin-top:16px"><summary>Qué es real y qué es simulado</summary>
+    <p class="mute">La lectura de placa es el texto de la placa; el rostro se compara con números (misma persona: distancia baja; otra persona: alta; tolerancia 0,55). Los nombres, documentos y respuestas del citófono los inventa el generador de casos. El dinero y los aciertos son un juego para practicar decisiones: no son reglas del proyecto. En la versión de Godot hay 3D, personas caminando, cámaras de seguridad y cinemáticas; aquí no.</p></details>
+</section>
+
+<section id="sistemas" class="band"><div class="w">
+  <div class="eyebrow">Arquitectura propuesta</div>
+  <h2>Un computador decide, el Arduino ejecuta.</h2>
+  <div class="arch">
+    <div class="card"><h3>Cámaras y lector</h3><span class="mute small">Ven el rostro, la placa o la tarjeta</span></div><div class="ar">→</div>
+    <div class="card"><h3>Computador principal</h3><span class="mute small">Reconoce, aplica reglas y guarda el historial</span></div><div class="ar">→</div>
+    <div class="card"><h3>Arduino</h3><span class="mute small">Sube la pluma, pita y muestra un mensaje</span></div>
+  </div>
+  <p style="margin-top:18px">Todo va conectado a una <b>UPS</b> (batería de respaldo) para seguir funcionando si falla la luz. Cuánto aguanta se calcula así: <code>horas ≈ (Wh de la batería × eficiencia) ÷ consumo en W</code>. La meta de 24 horas depende de medir el consumo real; todavía no está comprobada.</p>
+  <h3 style="margin-top:30px">Tres piezas, una misma lógica</h3>
+  <div class="grid">
+    <div class="card"><span class="pill neu">Godot</span><h3 style="margin-top:8px">Simulador 3D</h3><p class="mute">Muestra todo el flujo sin hardware, con 40 puestos, casos de robo y apagones. Las reglas pasan sus pruebas automáticas.</p></div>
+    <div class="card"><span class="pill neu">Python</span><h3 style="margin-top:8px">Sistema con cámara y rostros</h3><p class="mute">Programa de escritorio con base de datos SQLite. Las reglas y el puente con Arduino tienen 22 pruebas que pasan. La ventana, la cámara y el reconocimiento facial no se han probado.</p></div>
+    <div class="card"><span class="pill neu">Arduino</span><h3 style="margin-top:8px">Pluma y lector de tarjetas</h3><p class="mute">Reglas en C++ con 23 pruebas que pasan en un PC. No se ha cargado en una placa real.</p></div>
+  </div>
+  <h3 style="margin-top:30px">Librerías</h3>
+  <div class="scroll" style="margin-top:10px"><table>
+    <tr><th>Para qué</th><th>Librería</th><th>Estado</th></tr>
+    <tr><td>Cámara</td><td>opencv-python (PC) · picamera2 (Raspberry Pi)</td><td><span class="pill warn">Sin probar con cámara real</span></td></tr>
+    <tr><td>Rostros</td><td>face_recognition (dlib)</td><td><span class="pill warn">Sin probar aquí</span></td></tr>
+    <tr><td>Ventana</td><td>customtkinter, Pillow</td><td><span class="pill warn">Sin probar aquí</span></td></tr>
+    <tr><td>Arduino desde el PC</td><td>pyserial</td><td><span class="pill ok">Probado con conexión simulada</span></td></tr>
+    <tr><td>Placas</td><td>easyocr, pytesseract, Plate Recognizer, OpenALPR</td><td><span class="pill neu">Candidatas, sin evaluar</span></td></tr>
+    <tr><td>Modelo del carro</td><td>—</td><td><span class="pill neu">No evaluado</span></td></tr>
+  </table></div>
+</div></section>
+
+<section id="documentos">
+  <div class="eyebrow">Documentos</div>
+  <h2>Todo el proyecto está documentado.</h2>
+  <p>Cada tarjeta del tablero de Trello tiene su documento, con el mismo nombre. Están escritos en APA 7, con el encabezado de la institución.</p>
+  <div id="docs"></div>
+</section>
+
+<section id="github" class="band"><div class="w">
+  <div class="eyebrow">GitHub</div>
+  <h2>El repositorio guarda el código y el historial de cambios.</h2>
+  <p>GitHub es un sitio donde el equipo guarda el código y los documentos, y donde queda anotado quién cambió qué y cuándo. Así nada se pierde y el profesor puede revisar el avance.</p>
+  <div class="scroll"><table>
+    <tr><th>Carpeta</th><th>Qué contiene</th></tr>
+    <tr><td><code>simulador/</code></td><td>Simulador 3D en Godot 4.</td></tr>
+    <tr><td><code>sistema-python/</code></td><td>Programa con cámara y rostros, y su puente con Arduino.</td></tr>
+    <tr><td><code>prototipo-arduino/</code></td><td>Código para el Arduino UNO, reglas en C++ y sus pruebas.</td></tr>
+    <tr><td><code>docs/documentos/</code></td><td>Los documentos del proyecto.</td></tr>
+    <tr><td><code>docs/uml/</code></td><td>Diagramas UML, de datos y de procesos.</td></tr>
+    <tr><td><code>web/</code></td><td>Esta página.</td></tr>
+  </table></div>
+  <pre>git clone https://github.com/SrMrLDavid/cispph.git
+cd cispph/sistema-python
+python -m unittest discover -s pruebas</pre>
+  <div class="row"><a class="btn p" href="https://github.com/SrMrLDavid/cispph">Abrir el repositorio</a></div>
+</div></section>
+
+<section id="equipo">
+  <div class="eyebrow">Equipo</div>
+  <h2>Quiénes somos</h2>
+  <p>Estudiantes de Tecnología en Desarrollo de Software de la Escuela Tecnológica Instituto Técnico Central (ETITC). Docente: José Del Carmen Ortega Castro.</p>
+  <div class="grid">
+    <div class="card"><h3>Luis David Caicedo Rodríguez</h3><span class="pill neu">Product Owner</span><p class="mute" style="margin-top:8px">Decide qué se construye y en qué orden.</p></div>
+    <div class="card"><h3>Edisson David Vargas Castiblanco</h3><span class="pill neu">Scrum Master</span><p class="mute" style="margin-top:8px">Cuida el método de trabajo y quita bloqueos.</p></div>
+    <div class="card"><h3>Javier Santiago Pérez Tobon</h3><span class="pill neu">Desarrollo</span><p class="mute" style="margin-top:8px">Participó en la construcción del sistema.</p></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="w">Proyecto académico con cliente ficticio. Versión del 26/10/2026. Lo que no se ha probado está marcado como tal en cada sección.</div></footer>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $=id=>document.getElementById(id);
+function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>e.hidden=true,3200)}
+$('tema').onclick=()=>{const r=document.documentElement;const d=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;r.dataset.theme=d?'light':'dark';draw()};
+
+/* ---------- Documentos por tarjeta de Trello ---------- */
+const GH='https://github.com/SrMrLDavid/cispph/blob/main/docs/documentos/';
+const DOCS=[
+ ['Inicio y organización',[['Acta de Inicio del proyecto','01 Acta de Inicio del proyecto.docx'],['Definición de Roles','01 Definición de Roles.docx'],['EDT / WBS del proyecto','01 EDT y WBS del proyecto.docx'],['Cronograma de Actividades','01 Cronograma de Actividades.xlsx']]],
+ ['Caso y contexto',[['Caso del Cliente','02 Caso del Cliente.docx'],['Narrativa del proyecto','02 Narrativa del proyecto.docx']]],
+ ['Investigación',[['Cuestionario para el guarda','03 Cuestionario para el guarda.docx'],['Entrevistas y encuestas','03 Entrevistas y encuestas.docx'],['Observación Directa','03 Observación Directa.docx'],['Observación Indirecta','03 Observación Indirecta.docx'],['Investigación Normativa y Legal','03 Investigación Normativa y Legal.docx'],['Categorías VIS / VIP / No VIP','03 Categorías de parqueadero VIS VIP NoVIP.docx']]],
+ ['Análisis',[['Estado del Arte','04 Estado del Arte.docx'],['Herramientas de lectura de placas','04 Herramientas de lectura de placas.docx'],['Plataformas No-Code','04 Plataformas No-Code.docx'],['Ingeniería de requisitos y actores','04 Ingeniería de requisitos y actores.docx']]],
+ ['Scrum y diseño',[['Product Backlog / Sprint Backlog','05 Product Backlog y Sprint Backlog.xlsx'],['Evidencias de Scrum','05 Evidencias de Scrum.docx'],['Historias de usuario','06 Historias de usuario.docx'],['BPMN / Modelado del proceso','07 BPMN Modelado del proceso.docx'],['Modelado del Sistema (UML)','07 Modelado del Sistema.docx'],['Modelo de datos y SDD','07 Modelo de datos y SDD.docx'],['Diseño UI/UX','08 Diseño UI-UX.docx']]],
+ ['Propuesta, pruebas y manuales',[['Canva: Lean Canvas, Mapa de Empatía y Propuesta de Valor','09 Canva Lean Canvas Mapa de Empatía y Propuesta de Valor.docx'],['Pruebas y validación del prototipo','10 Pruebas y validación del prototipo.docx'],['Presentación final','10 Presentación final.pptx'],['Manual del sistema Python','11 Manual del sistema Python.docx'],['Manual del simulador 3D','11 Manual del simulador 3D.docx'],['Manual del prototipo Arduino','11 Manual del prototipo Arduino.docx'],['Guía del repositorio GitHub','11 Guía del repositorio GitHub.docx']]]
+];
+$('docs').innerHTML=DOCS.map(([g,l],i)=>'<details'+(i===0?' open':'')+'><summary>'+g+' <span class="mute small">('+l.length+')</span></summary><div class="grid" style="margin-top:6px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">'+
+  l.map(([n,f])=>'<a class="card" style="box-shadow:none;text-decoration:none;color:inherit;padding:12px 14px" href="'+GH+encodeURIComponent(f)+'"><b style="font-size:.95rem">'+n+'</b><br><span class="mute small">'+f.split('.').pop().toUpperCase()+' · ver en GitHub</span></a>').join('')+'</div></details>').join('');
+
+/* ====================================================================
+   SIMULADOR LIGERO — mismas reglas que Sistema.evaluar_acceso de Godot
+   ==================================================================== */
+const TOL=0.55, N_R=25, N_V=15;
+const TIPOS={sedan:'sedán',suv:'camioneta SUV',hatchback:'hatchback',pickup:'camioneta pick-up',moto:'moto'};
+const COLORES={'#c0392b':'rojo','#2c3e50':'azul oscuro','#e67e22':'naranja','#1abc9c':'turquesa','#f1c40f':'amarillo','#2980b9':'azul','#ecf0f1':'blanco','#7f8c8d':'gris','#27ae60':'verde'};
+const CKEYS=Object.keys(COLORES), TKEYS=Object.keys(TIPOS);
+const NOMBRES=['Camilo','Valentina','Julián','Paula','Mateo','Natalia','Sebastián','Laura','Diego','Carolina','Santiago','Juliana','Andrés','Mónica','Esteban','Luisa'];
+const APELLIDOS=['Ramírez','Torres','Gómez','Herrera','Vargas','Castro','Ortiz','Rojas','Mejía','Cárdenas','Peña','Suárez','Ríos','Parra'];
+const APTOS=['A-101','B-205','C-302','A-203','B-104','C-401','A-302','B-303'];
+const BASE=[
+ ['residente','Carlos','Rodríguez','R-01','ABC-123','A-101','',''],['residente','María','González','R-02','DEF-456','B-205','',''],
+ ['residente','Pedro','Martínez','R-03','GHI-789','C-302','',''],['residente','Sofía','Cardona','R-04','KLM-210','A-203','',''],
+ ['residente','Andrés','Salazar','R-05','NPR-334','B-104','',''],['residente','Daniela','Quintero','R-06','TUV-581','C-401','',''],
+ ['residente','Felipe','Montoya','R-07','XYZ-789','A-302','',''],['residente','Lucía','Acosta','R-08','BCD-902','B-303','',''],
+ ['trabajador','Roberto','Sánchez','','PQR-678','','mañana',''],['trabajador','Laura','Díaz','','STU-901','','tarde',''],
+ ['visitante','Juan','Pérez','','JKL-012','A-101','','Carlos Rodríguez'],['visitante','Ana','López','','MNO-345','B-205','','María González'],
+ ['visitante','Mauricio','Ríos','','ELV-310','','','Administración']];
+var S;
+let rnd=Math.random;
+const pick=a=>a[Math.floor(rnd()*a.length)];
+function vehPara(id){return{tipo:TKEYS[(id*7)%TKEYS.length],color:CKEYS[(id*5)%CKEYS.length]}}
+function descVeh(v){return TIPOS[v.tipo]+' '+COLORES[v.color]}
+function nombre(u){return u.nombre+' '+u.apellido}
+function nuevoEstado(){
+  const E={usuarios:[],dentro:{},ocup:{},mov:[],hora:17.5,dinero:0,aciertos:0,dudosos:0,fallos:0,caso:null,
+    modo:'auto',vel:1,apagon:0,sigId:1,tAuto:0,carros:[],tiemposG:[],nAuto:0,nGuardia:0,usoInsp:0};
+  E.pR=[];E.pV=[];for(let i=1;i<=N_R;i++)E.pR.push('R-'+String(i).padStart(2,'0'));for(let i=1;i<=N_V;i++)E.pV.push('V-'+String(i).padStart(2,'0'));
+  [...E.pR,...E.pV].forEach(p=>E.ocup[p]=0);
+  BASE.forEach(b=>{const id=E.sigId++;E.usuarios.push({id,rol:b[0],nombre:b[1],apellido:b[2],parq:b[3],apto:b[5],turno:b[6],autPor:b[7],rostro:1000+id*37,
+    vip:id===3||id===13,activo:true,autVig:b[0]==='visitante',vehs:[{placa:b[4],...vehPara(id)}]});});
+  E.usuarios[0].vehs.push({placa:'CAR-777',tipo:'hatchback',color:'#2980b9'});E.usuarios[3].vehs.push({placa:'SOF-204',tipo:'suv',color:'#ecf0f1'});
+  S=E;[2,4,5].forEach(id=>{const u=uid(id);ocupar(u,u.parq,u.vehs[0].placa)});
+  return E}
+const uid=id=>S.usuarios.find(u=>u.id===id);
+const placaN=p=>p.toUpperCase();
+function buscarPlaca(p){for(const u of S.usuarios)for(const v of u.vehs)if(v.placa===p)return u;return null}
+function vehReg(u,p){return u.vehs.find(v=>v.placa===p)||u.vehs[0]}
+const estaDentro=id=>!!S.dentro[id];
+function categoria(u){if(!u)return'Sin categoría';if(u.vip)return'VIP';return u.rol==='residente'?'No VIP':u.rol==='visitante'?'VIS':'Sin categoría'}
+function asignadoOtro(p,id){return S.usuarios.some(u=>u.id!==id&&u.parq===p&&u.rol!=='visitante')}
+function puestoLibre(u){
+  if(u.rol==='visitante'){return S.pV.find(p=>!S.ocup[p])||''}
+  if(u.parq&&!S.ocup[u.parq])return u.parq;
+  return S.pR.find(p=>!S.ocup[p]&&!asignadoOtro(p,u.id))||'';}
+function dist(a,b){const h=((a*73856093)^(b*19349663)^0x5bd1e995)&0x7fffffff;const r=(h%1000)/1000;return a===b?0.15+r*0.23:0.62+r*0.28}
+function identificarRostro(r){let best=null,bd=9;for(const u of S.usuarios){const d=dist(u.rostro,r);if(d<bd){bd=d;best=u}}return bd<=TOL?best:null}
+function enTurno(u,h){if(u.turno==='mañana')return h>=6&&h<14;if(u.turno==='tarde')return h>=14&&h<22;return true}
+function evaluar(c){
+  const h=Math.floor(S.hora)%24;
+  const r={res:'denegado',motivo:'',usuario:null,d:1,puesto:''};
+  const u=buscarPlaca(c.pDel);r.usuario=u;
+  if(c.pDel!==c.pTra){r.res='revisar';r.motivo='Las placas delantera y trasera no coinciden.';return r}
+  if(!u){r.res='revisar';r.motivo='Placa no registrada: vehículo desconocido.';return r}
+  const d=dist(u.rostro,c.rostro);r.d=d;
+  if(d>TOL){r.res='revisar';r.motivo='El rostro del conductor no coincide con el titular de la placa (distancia '+d.toFixed(2)+' > '+TOL.toFixed(2)+').';return r}
+  const reg=vehReg(u,c.pDel);
+  if(reg.tipo!==c.veh.tipo||reg.color!==c.veh.color){r.res='revisar';r.motivo='El vehículo observado ('+descVeh(c.veh)+') no coincide con el registrado ('+descVeh(reg)+').';return r}
+  const dentro=estaDentro(u.id);
+  if(c.sentido==='Entrada'&&dentro){r.motivo=nombre(u)+' ya se encuentra DENTRO.';return r}
+  if(c.sentido==='Salida'&&!dentro){r.motivo=nombre(u)+' ya está FUERA o no registró entrada.';return r}
+  if(u.rol==='visitante'&&c.sentido==='Entrada'&&!u.autVig){r.res='revisar';r.motivo='La autorización de la visita no está vigente.';return r}
+  if(u.rol==='trabajador'&&c.sentido==='Entrada'&&!enTurno(u,h)){r.res='revisar';r.motivo='Trabajador fuera de su turno ('+u.turno+').';return r}
+  if(c.sentido==='Entrada'){const p=puestoLibre(u);if(!p){r.motivo='No hay puestos libres en la zona que corresponde.';return r}r.puesto=p}else r.puesto=S.dentro[u.id];
+  r.res='autorizado';r.motivo='Acceso permitido.';return r}
+
+/* ----- generador de casos (port de generador_casos.gd) ----- */
+const cedula=()=>String(1+Math.floor(rnd()*9))+Array.from({length:8},()=>Math.floor(rnd()*10)).join('');
+function placaLibre(){const L='ABCDEFGHJKLMNPRSTUVWXYZ';for(let i=0;i<50;i++){const p=[0,1,2].map(()=>L[Math.floor(rnd()*L.length)]).join('')+'-'+String(Math.floor(rnd()*1000)).padStart(3,'0');if(!buscarPlaca(p))return p}return'ZZZ-999'}
+const conRol=(rol,dentro)=>S.usuarios.filter(u=>u.rol===rol&&u.activo&&estaDentro(u.id)===dentro);
+const personaDe=u=>({nombre:u.nombre,apellido:u.apellido,doc:'CC '+(1000000000+u.id*7919),apto:u.apto,motivo:'',regId:u.id});
+function personaAl(ap,apto){return{nombre:pick(NOMBRES),apellido:ap||pick(APELLIDOS),doc:'CC '+cedula(),apto:apto||pick(APTOS),motivo:'visita',regId:0}}
+const nuevoRostro=()=>5000+Math.floor(rnd()*900000);
+function cito(u,apto,resp,si,no){const a=(u&&u.rol==='residente')?u:S.usuarios.find(x=>x.rol==='residente'&&x.apto===apto);
+  const q=a?nombre(a):'Administración',l=a?a.apto:'Administración';return{residente:q,apto:l,responde:resp,texto:q+' ('+l+'): «'+(resp?si:no)+'»'}}
+function base(sent,esc,u){const placa=u?u.vehs[0].placa:placaLibre();const v=u?u.vehs[0]:vehPara(Math.floor(rnd()*100000)+100);
+  return{sentido:sent,esc,usuario:u,pDel:placa,pTra:placa,rostro:u?u.rostro:nuevoRostro(),veh:{tipo:v.tipo,color:v.color},conductor:u?personaDe(u):personaAl(),cito:null,legit:true}}
+function conOtroVeh(u){const v=pick(u.vehs);const c=base('Entrada','residente_normal',u);c.pDel=c.pTra=v.placa;c.veh={tipo:v.tipo,color:v.color};return c}
+function genEntrada(){
+  const p=rnd();let u,c;
+  if(p<.30){u=pick(conRol('residente',false));if(u)return conOtroVeh(u)}
+  if(p<.38){u=pick(conRol('trabajador',false));if(u)return base('Entrada','trabajador',u)}
+  if(p<.50){u=pick(conRol('visitante',false));if(u){c=base('Entrada','visitante',u);c.cito=cito(null,u.apto,true,'Sí, esperamos esa visita, déjenla pasar.','');return c}}
+  if(p<.60){u=pick(conRol('residente',false));if(u){const l=rnd()<.45;c=base('Entrada','conductor_distinto',u);c.rostro=nuevoRostro();c.legit=l;c.conductor=personaAl(l?u.apellido:'',u.apto);c.conductor.motivo=l?'familiar':'dice ser conocido';
+      c.cito=cito(u,u.apto,l,'Sí, es mi familiar y va en mi vehículo, déjenlo pasar.','No he prestado mi vehículo a nadie, no lo dejen entrar.');return c}}
+  if(p<.68){u=pick(conRol('residente',false));if(u){const l=rnd()<.5;c=base('Entrada','vehiculo_distinto',u);let o=vehPara(Math.floor(rnd()*100000)+300);while(o.tipo===c.veh.tipo&&o.color===c.veh.color)o=vehPara(Math.floor(rnd()*100000)+300);
+      c.veh=o;c.legit=l;if(!l){c.rostro=nuevoRostro();c.conductor=personaAl()}
+      c.cito=cito(u,u.apto,l,'Sí, cambié de vehículo y se me olvidó actualizar el registro.','Mi vehículo no es ese. Esa placa debe estar clonada, no lo dejen pasar.');return c}}
+  if(p<.82){c=base('Entrada','desconocido',null);const r=rnd()<.5;c.legit=r;c.cito=cito(null,c.conductor.apto,r,'Sí, es un conocido, pueden registrarlo como visitante.','No conozco a esa persona, no lo dejen pasar.');return c}
+  if(p<.90){const d=S.usuarios.filter(x=>estaDentro(x.id));u=pick(d);if(u){c=base('Entrada','ya_dentro',u);c.legit=false;return c}}
+  if(p<.95){u=pick(conRol('residente',false));if(u){c=base('Entrada','placa_trasera_distinta',u);c.pTra=placaLibre();c.legit=false;return c}}
+  u=pick(conRol('residente',false));return u?conOtroVeh(u):base('Entrada','desconocido',null)}
+function genSalida(){
+  const d=S.usuarios.filter(x=>estaDentro(x.id));if(!d.length)return null;const u=pick(d);const c=base('Salida','salida_normal',u);
+  const v=u.vehs.find(x=>x.placa===S.carroDe[u.id])||u.vehs[0];c.pDel=c.pTra=v.placa;c.veh={tipo:v.tipo,color:v.color};
+  if(rnd()<.3){const l=rnd()<.4;c.esc='salida_conductor_distinto';c.legit=l;
+    if(l){c.rostro=nuevoRostro();c.conductor=personaAl(u.apellido,u.apto);c.conductor.motivo='familiar'}
+    else{const otros=S.usuarios.filter(x=>x.id!==u.id);const o=pick(otros);if(o&&rnd()<.6){c.rostro=o.rostro;c.conductor=personaDe(o)}else{c.rostro=nuevoRostro();c.conductor=personaAl()}}
+    c.cito=cito(u,u.apto,l,'Sí, lo autoricé para que saque el vehículo.','No autoricé a nadie a sacar mi vehículo. Detengan a esa persona y que no salga con el vehículo.')}
+  return c}
+function generar(sent){
+  if(S.caso||S.carros.some(c=>c.estado==='espera')){toast('Primero resuelva el caso que está en la garita.');return}
+  const c=sent==='Salida'?genSalida():genEntrada();
+  if(!c){toast('No hay nadie dentro: genere una entrada.');return}
+  c.t0=performance.now();c.vista=null;c.cito_ok=null;c.pregunta=0;c.regVis=false;
+  c.eval=S.apagon>0?null:evaluar(c);S.caso=c;
+  const car=nuevoCarro(c);car.estado='llega';S.carros.push(car);c.car=car;
+  if(c.sentido==='Salida')toast('Un vehículo se acerca a la barrera de salida.');
+  render()}
+
+/* ----- ocupación, decisión y registro ----- */
+S=null;
+function ocupar(u,p,placa){S.ocup[p]=u.id;S.dentro[u.id]=p;(S.carroDe=S.carroDe||{})[u.id]=placa}
+function liberar(u){const p=S.dentro[u.id];if(p)S.ocup[p]=0;delete S.dentro[u.id]}
+function horaTxt(){const h=Math.floor(S.hora)%24,m=Math.floor((S.hora%1)*60);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+function registrar(c,dec,det,por,nota,puesto){
+  S.mov.unshift({hora:horaTxt(),sent:c.sentido,placa:c.pDel,quien:c.eval&&c.eval.usuario?nombre(c.eval.usuario):(c.usuario?nombre(c.usuario):'Desconocido'),
+    cat:categoria(c.eval?c.eval.usuario:c.usuario),dec,det,por,nota:nota||'',puesto:puesto||''})}
+function ejecutar(c,permitir,por,nota){
+  // error de conexión simulado: la operación NO se registra y se puede reintentar
+  if($('cErr').checked&&rnd()<.07){toast('Error de conexión: la operación no se registró. Intente de nuevo.');return false}
+  const ev=c.eval;let u=ev&&ev.usuario?ev.usuario:(c.usuario||buscarPlaca(c.pDel));let puesto='';let det=ev?ev.motivo:'Sistema caído: decisión del guarda';
+  if(permitir){
+    if(c.sentido==='Entrada'){
+      if(!u){toast('Un vehículo no registrado solo puede pasar si se registra primero como visitante.');return false}
+      if(estaDentro(u.id)){toast('Ya figura dentro: no se puede permitir una doble entrada.');return false}
+      puesto=puestoLibre(u);if(!puesto){toast('No hay puesto libre para esta persona.');return false}
+      ocupar(u,puesto,c.pDel);det=(por==='Automático'?'Acceso permitido.':det+' · Permitido por el guarda.')}
+    else{if(!u||!estaDentro(u.id)){toast('Esa persona no figura dentro.');return false}puesto=S.dentro[u.id];liberar(u);det=(por==='Automático'?'Acceso permitido.':det+' · Permitido por el guarda.')}
+    registrar(c,'permitido',det,por,nota,puesto);c.car.estado=c.sentido==='Entrada'?'entra':'sale';c.car.puesto=puesto;
+    if(c.sentido==='Entrada')c.car.destino=puesto;
+  }else{
+    registrar(c,'denegado',det+(por==='Automático'?'':' · Denegado por el guarda.'),por,nota,'');
+    c.car.estado=c.sentido==='Entrada'?'retira':'vuelve';
+    if(c.sentido==='Salida'&&!c.legit&&por!=='Automático'){toast('Policía: se llevan a la persona detenida. El vehículo vuelve a su puesto.')}}
+  if(por!=='Automático'){S.nGuardia++;S.tiemposG.push((performance.now()-c.t0)/1000)}else S.nAuto++;
+  puntuar(c,permitir,por);S.caso=null;S.pend=null;barreraAbre(c,permitir);render();return true}
+function puntuar(c,permitir,por){
+  if(por==='Automático')return;
+  const dudoso=c.eval?c.eval.res==='revisar':true;if(!dudoso)return;S.dudosos++;
+  let ok,msg;
+  if(c.legit){ok=permitir;S.dinero+=ok?1000:-10000;msg=ok?'Acertó: era legítimo.':'Era legítimo y lo negó (−$10.000).'}
+  else{ok=!permitir;S.dinero+=ok?(c.sentido==='Salida'?20000:1000):-50000;msg=ok?'Acertó: no era legítimo.':'No era legítimo y lo dejó pasar (−$50.000).'}
+  if(ok)S.aciertos++;else S.fallos++;toast(msg+' (valores de juego)')}
+let barrera={ent:0,sal:0};
+function barreraAbre(c,perm){if(!perm)return;if(c.sentido==='Entrada')barrera.ent=1;else barrera.sal=1}
+
+/* ----- panel del guarda ----- */
+function panel(){
+  const c=S.caso;const p=$('panel');
+  if(!c){p.innerHTML='<div class="vacio">No hay ningún vehículo en la garita.<br>Genere una entrada o una salida.</div>';return}
+  const ev=c.eval,caido=!ev;
+  let h='';if(S.apagon>0)h+='<div class="apag">SISTEMA CAÍDO — decide usted. Faltan '+Math.ceil(S.apagon)+' s.</div>';
+  h+='<div class="row" style="justify-content:space-between"><b>'+c.sentido+' · '+descVeh(c.veh)+'</b><span class="mute small">'+horaTxt()+'</span></div>';
+  h+='<div class="fotos"><div class="foto">Placa delantera<div class="placa">'+c.pDel+'</div></div><div class="foto">Placa trasera<div class="placa">'+c.pTra+'</div></div><div class="foto">Rostro<br><canvas id="rost" width="56" height="56"></canvas></div></div>';
+  h+='<div class="small mute">Documento: <b style="color:var(--ink)">'+c.conductor.nombre+' '+c.conductor.apellido+'</b> · '+c.conductor.doc+(c.conductor.apto?' · '+c.conductor.apto:'')+'</div>';
+  if(caido)h+='<div class="veredicto warn">Sin veredicto del sistema<small>Solo cuenta con lo que ve: placas, vehículo y documento.</small></div>';
+  else{const k=ev.res;h+='<div class="veredicto '+(k==='autorizado'?'ok':k==='revisar'?'warn':'bad')+'">'+k.toUpperCase()+'<small>'+ev.motivo+'</small></div>'}
+  const needInsp=caido||ev.res==='revisar';
+  if(needInsp){h+='<ul class="chk">'+checks(c).map(x=>'<li class="'+x[0]+'"><b>'+(x[0]==='y'?'✔':x[0]==='n'?'✘':'?')+'</b><span>'+x[1]+'</span></li>').join('')+'</ul>'}
+  if(c.cito_ok!==null&&c.cito)h+='<div class="small card" style="box-shadow:none;padding:8px 10px">'+(c.cito.texto||'No había a quién consultar.')+'</div>';
+  else if(c.pregunta>0)h+='<div class="small mute">Esperando confirmación… '+Math.ceil(c.pregunta)+' s</div>';
+  const llegada=c.car.estado==='espera';
+  h+='<div class="dec">';
+  if(needInsp){
+    h+='<button class="btn s" id="bPreg" '+(c.pregunta>0||c.cito_ok!==null?'disabled':'')+'>'+(caido?'Enviar a preguntar':'Llamar por citófono')+'</button>';
+    const noReg=!(c.usuario||buscarPlaca(c.pDel));
+    if(noReg&&c.sentido==='Entrada'){h+='<button class="btn g s" id="bPerm" '+(caido||c.cito_ok!==true||!llegada?'disabled':'')+'>Registrar visitante y permitir</button>'}
+    else h+='<button class="btn g s" id="bPerm" '+(!llegada?'disabled':'')+'>Permitir bajo mi responsabilidad</button>';
+    h+='<button class="btn r s" id="bNeg" '+(!llegada?'disabled':'')+'>'+(c.sentido==='Salida'?'Negar / detener a la persona':'Negar')+'</button>';
+    h+='</div><input class="note" id="nota" placeholder="Nota opcional para el historial" maxlength="80">';
+  }else{
+    const ok=ev.res==='autorizado';
+    if(S.modo==='auto')h+='<span class="small mute">Modo automático: se ejecuta en '+Math.ceil(S.tAuto>0?S.tAuto:3)+' s.</span>';
+    h+='<button class="btn '+(ok?'g':'r')+' s" id="bYa" '+(!llegada?'disabled':'')+'>'+(ok?'Permitir ahora':'Confirmar denegado')+'</button></div>';
+  }
+  const nv=$('nota'),nval=nv?nv.value:'',nfoc=nv&&document.activeElement===nv;
+  p.innerHTML=h;
+  if(nval&&$('nota')){$('nota').value=nval;if(nfoc)$('nota').focus()}
+  const rc=$('rost');if(rc)cara(rc.getContext('2d'),c.rostro);
+  const g=id=>$(id);
+  if(g('bPreg'))g('bPreg').onclick=preguntar;
+  if(g('bPerm'))g('bPerm').onclick=()=>permitirRev();
+  if(g('bNeg'))g('bNeg').onclick=()=>ejecutar(S.caso,false,'Guardia',($('nota')||{}).value);
+  if(g('bYa'))g('bYa').onclick=()=>ejecutar(S.caso,S.caso.eval.res==='autorizado','Guardia','');
+}
+function permitirRev(){const c=S.caso;const nota=($('nota')||{}).value;
+  if(c.sentido==='Entrada'&&(!c.eval||!c.eval.usuario)){
+    const d=c.conductor;const id=S.sigId++;const u={id,rol:'visitante',nombre:d.nombre,apellido:d.apellido,parq:'',apto:d.apto,turno:'',autPor:c.cito?c.cito.residente:'',rostro:c.rostro,vip:false,activo:true,autVig:true,vehs:[{placa:c.pDel,tipo:c.veh.tipo,color:c.veh.color}]};
+    if(!S.pV.some(p=>!S.ocup[p])){toast('No hay puestos de visitantes libres: debe negar.');return}
+    S.usuarios.push(u);c.eval={res:'revisar',usuario:u,motivo:'Vehículo no registrado: se registró como visitante.',d:0,puesto:''}}
+  ejecutar(c,true,'Guardia',nota)}
+function preguntar(){const c=S.caso;if(!c)return;S.usoInsp++;c.pregunta=S.apagon>0?6:3}
+function checks(c){const ev=c.eval,L=[];const caido=!ev;
+  L.push([c.pDel===c.pTra?'y':'n','Placa delantera '+(c.pDel===c.pTra?'igual a':'distinta de')+' la trasera']);
+  L.push(['q','Vehículo visto: '+descVeh(c.veh)]);
+  L.push(['q','Documento: '+c.conductor.nombre+' '+c.conductor.apellido+' ('+c.conductor.doc+')']);
+  if(caido)return L;
+  const u=ev.usuario;
+  if(!u){L.push(['n','Placa no registrada en la base']);return L}
+  L.push(['y','Placa registrada a nombre de '+nombre(u)+' · '+categoria(u)]);
+  const reg=vehReg(u,c.pDel);const vok=reg.tipo===c.veh.tipo&&reg.color===c.veh.color;
+  L.push([vok?'y':'n','Vehículo registrado: '+descVeh(reg)+(vok?'':' (no coincide)')]);
+  const dd=dist(u.rostro,c.rostro);L.push([dd<=TOL?'y':'n','Rostro vs titular: distancia '+dd.toFixed(2)+' (tolerancia '+TOL.toFixed(2)+')']);
+  if(dd>TOL){const q=identificarRostro(c.rostro);L.push(['q',q?'El rostro corresponde a '+nombre(q)+' ('+q.rol+')':'El rostro no corresponde a nadie registrado'])}
+  const dentro=estaDentro(u.id);const okS=c.sentido==='Entrada'?!dentro:dentro;
+  L.push([okS?'y':'n',(dentro?'Figura dentro':'Figura fuera')+' del parqueadero']);
+  if(u.rol==='trabajador')L.push([enTurno(u,Math.floor(S.hora)%24)?'y':'n','Turno '+u.turno]);
+  if(u.rol==='visitante')L.push([u.autVig?'y':'n','Autorización de la visita '+(u.autVig?'vigente':'no vigente')]);
+  if(c.sentido==='Entrada')L.push([puestoLibre(u)?'y':'n',puestoLibre(u)?'Hay puesto libre ('+puestoLibre(u)+')':'Sin puestos libres']);
+  return L}
+function cara(x,seed){x.clearRect(0,0,56,56);const r=n=>((seed*n*2654435761)>>>0)%1000/1000;
+  const piel=['#f1c27d','#e0ac69','#c68642','#8d5524','#ffdbac'][Math.floor(r(3)*5)],pelo=['#2b1b12','#5a3825','#a0522d','#1c1c1c','#c9a227'][Math.floor(r(7)*5)];
+  x.fillStyle=pelo;x.beginPath();x.ellipse(28,24,19,19,0,0,7);x.fill();x.fillStyle=piel;x.beginPath();x.ellipse(28,30,15,18,0,0,7);x.fill();
+  x.fillStyle=pelo;x.fillRect(13,14,30,8+r(11)*6);x.fillStyle='#222';const e=6+r(5)*4;x.beginPath();x.arc(28-e,28,1.8,0,7);x.arc(28+e,28,1.8,0,7);x.fill();
+  x.strokeStyle='#7a3b2e';x.lineWidth=1.6;x.beginPath();x.arc(28,38,5+r(13)*3,0.15*Math.PI,0.85*Math.PI);x.stroke()}
+
+/* ----- HUD, historial, métricas ----- */
+function hud(){const dentro=Object.keys(S.dentro).length,lR=S.pR.filter(p=>!S.ocup[p]).length,lV=S.pV.filter(p=>!S.ocup[p]).length;
+  const k=(t,v)=>'<div class="kpi">'+t+'<b>'+v+'</b></div>';
+  $('hud').innerHTML=k('Hora simulada',horaTxt())+k('Dentro',dentro)+k('Residentes libres',lR+'/'+N_R)+k('Visitantes libres',lV+'/'+N_V)+k('Aciertos',S.aciertos+'/'+S.dudosos)+k('Dinero (juego)','$'+S.dinero.toLocaleString('es-CO'))}
+function histo(){if(!S.mov.length){$('hist').innerHTML='<div class="vacio" style="padding:20px">Aún no hay movimientos.</div>';return}
+  $('hist').innerHTML='<table><tr><th>Hora</th><th>Sentido</th><th>Placa</th><th>Persona</th><th>Cat.</th><th>Decisión</th><th>Por</th><th>Detalle</th></tr>'+S.mov.slice(0,30).map(m=>'<tr><td>'+m.hora+'</td><td>'+m.sent+'</td><td><code>'+m.placa+'</code></td><td>'+m.quien+'</td><td>'+m.cat+'</td><td><span class="pill '+(m.dec==='permitido'?'ok':'bad')+'">'+m.dec+'</span></td><td>'+m.por+'</td><td>'+m.det+(m.nota?' · Nota: '+m.nota:'')+'</td></tr>').join('')+'</table>'}
+function metricas(){const t=S.tiemposG,n=t.length,pr=n?(t.reduce((a,b)=>a+b,0)/n).toFixed(1):'—';
+  $('metr').innerHTML='<b>Métricas de esta sesión</b><p class="small mute" style="margin:6px 0 0">Decisiones del guarda: <b>'+S.nGuardia+'</b> · automáticas: <b>'+S.nAuto+'</b> · tiempo de decisión del guarda (promedio / mín. / máx.): <b>'+pr+' s'+(n?' / '+Math.min(...t).toFixed(1)+' s / '+Math.max(...t).toFixed(1)+' s':'')+'</b> · consultas al citófono o «preguntar»: <b>'+S.usoInsp+'</b> · aciertos en casos dudosos: <b>'+S.aciertos+' de '+S.dudosos+'</b>.<br>Este tiempo incluye el tiempo de pensar de la persona: no mide el requisito de rendimiento (RNF-003).</p>'}
+function render(){hud();panel();histo();if(!$('metr').hidden)metricas();draw()}
+
+/* ----- mapa: geometría ----- */
+const SW=34,SH=38;
+const PX={},PY={},LANE={};
+function geom(){[...Array(N_R).keys()].forEach(i=>{const p='R-'+String(i+1).padStart(2,'0');if(i<13){PX[p]=232+i*SW;PY[p]=49;LANE[p]=100}else{PX[p]=232+(i-13)*SW;PY[p]=151;LANE[p]=100}});
+  [...Array(N_V).keys()].forEach(i=>{const p='V-'+String(i+1).padStart(2,'0');PX[p]=232+i*SW;PY[p]=269;LANE[p]=210})}
+geom();
+function rutaA(p){const x=PX[p],y=PY[p],l=LANE[p];const r=[[-40,190],[150,190],[205,190]];
+  if(l===100){r.push([205,100],[x,100],[x,y])}else{r.push([205,210],[x,210],[x,y])}return r}
+function nuevoCarro(c){const u=c.usuario||(c.eval&&c.eval.usuario);const col=c.veh.color,tipo=c.veh.tipo;
+  if(c.sentido==='Entrada')return{col,tipo,ruta:[[-40,190],[132,190]],i:0,x:-40,y:190,ang:0,estado:'llega',c};
+  const p=S.dentro[u.id];const r=rutaA(p).slice(2).reverse();r.push([205,230],[165,230]);
+  return{col,tipo,ruta:r,i:0,x:r[0][0],y:r[0][1],ang:0,estado:'llega',c,desdePuesto:p,id:u.id}}
+function pasoRuta(car,dt,ruta){let v=130*S.vel*dt;while(v>0&&car.i<ruta.length-1){const a=ruta[car.i],b=ruta[car.i+1];const dx=b[0]-car.x,dy=b[1]-car.y,d=Math.hypot(dx,dy);car.ang=Math.atan2(dy,dx);
+    if(d<=v){car.x=b[0];car.y=b[1];car.i++;v-=d}else{car.x+=dx/d*v;car.y+=dy/d*v;v=0}}
+  return car.i>=ruta.length-1}
+function actualizarCarros(dt){
+  for(const car of S.carros){
+    if(car.estado==='llega'){if(pasoRuta(car,dt,car.ruta)){car.estado='espera';render()}}
+    else if(car.estado==='entra'){if(!car.r2){car.r2=rutaA(car.destino).slice(1);car.r2[0]=[car.x,car.y];car.i=0;car.ang=0}
+      if(pasoRuta(car,dt,car.r2)){car.estado='fin';car.hecho=true}}
+    else if(car.estado==='sale'){if(!car.r2){car.r2=[[car.x,car.y],[-40,230]];car.i=0}if(pasoRuta(car,dt,car.r2)){car.estado='fin';car.hecho=true}}
+    else if(car.estado==='retira'){if(!car.r2){car.r2=[[car.x,car.y],[-60,190]];car.i=0}car.rev=true;if(pasoRuta(car,dt,car.r2)){car.estado='fin';car.hecho=true}}
+    else if(car.estado==='vuelve'){if(!car.r2){car.r2=car.ruta.slice().reverse();car.r2[0]=[car.x,car.y];car.i=0}if(pasoRuta(car,dt,car.r2)){car.estado='fin';car.hecho=true}}}
+  S.carros=S.carros.filter(c=>!c.hecho)}
+
+/* ----- dibujo ----- */
+const cv=$('mapa'),cx=cv.getContext('2d');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function rr(x,y,w,h,r){cx.beginPath();cx.roundRect?cx.roundRect(x,y,w,h,r):cx.rect(x,y,w,h)}
+function coche(x,y,ang,col,tipo,rev){cx.save();cx.translate(x,y);cx.rotate(ang+(rev?Math.PI:0));
+  const L=tipo==='moto'?14:tipo==='pickup'?30:26,A=tipo==='moto'?7:15;cx.fillStyle=col;rr(-L/2,-A/2,L,A,4);cx.fill();cx.strokeStyle='#0006';cx.lineWidth=1;cx.stroke();
+  cx.fillStyle='#bcd4e6';rr(L*.05,-A/2+2,L*.28,A-4,2);cx.fill();cx.restore()}
+function draw(){
+  const noche=S.apagon>0;cx.clearRect(0,0,760,330);
+  cx.fillStyle=css('--grass');cx.fillRect(0,0,760,330);
+  cx.fillStyle=css('--road');cx.fillRect(0,170,205,80);cx.fillRect(195,80,20,150);
+  cx.fillStyle=css('--lot');cx.fillRect(215,10,520,300);
+  cx.fillStyle=css('--road');cx.fillRect(215,80,520,40);cx.fillRect(215,190,520,40);
+  cx.strokeStyle='#ffffff66';cx.setLineDash([8,8]);cx.beginPath();cx.moveTo(0,210);cx.lineTo(195,210);cx.stroke();cx.setLineDash([]);
+  const allP=[...S.pR,...S.pV];cx.font='600 8px JetBrains Mono,monospace';cx.textAlign='center';
+  for(const p of allP){const x=PX[p]-SW/2+2,y=PY[p]-SH/2;cx.fillStyle=css('--spot');cx.fillRect(x,y,SW-4,SH);cx.strokeStyle=css('--spotln');cx.lineWidth=1;cx.strokeRect(x+.5,y+.5,SW-5,SH-1);
+    if(p[0]==='V'){cx.fillStyle='#4a5af022';cx.fillRect(x,y,SW-4,SH)}
+    cx.fillStyle=css('--mute');cx.fillText(p,PX[p],p[0]==='V'||PY[p]===151?y+SH-3:y+9)}
+  for(const p of allP){const id=S.ocup[p];if(!id)continue;
+    if(S.carros.some(c=>c.desdePuesto===p||c.destino===p))continue;
+    const u=uid(id);if(!u)continue;const v=u.vehs.find(v=>v.placa===S.carroDe[id])||u.vehs[0];
+    coche(PX[p],PY[p],PY[p]===49?-Math.PI/2:Math.PI/2,v.color,v.tipo)}
+  // garita y barreras
+  cx.fillStyle='#e6b94a';cx.fillRect(122,198,34,22);cx.fillStyle='#16202c';cx.font='700 8px Sora,sans-serif';cx.fillText('GARITA',139,212);
+  barr(150,190,barrera.ent);barr(150,230,barrera.sal);
+  cx.fillStyle=css('--mute');cx.font='500 9px Public Sans,sans-serif';cx.textAlign='left';cx.fillText('ENTRADA →',6,184);cx.fillText('← SALIDA',6,247);
+  cx.textAlign='left';cx.fillStyle=css('--mute');cx.fillText('Residentes R-01 a R-25',232,24);cx.fillText('Visitantes V-01 a V-15',232,248);
+  for(const c of S.carros){coche(c.x,c.y,c.ang,c.col,c.tipo,c.rev)}
+  if(noche){cx.fillStyle='rgba(4,10,24,.55)';cx.fillRect(0,0,760,330);cx.fillStyle='#ff8a8a';cx.font='700 14px Sora,sans-serif';cx.fillText('SISTEMA CAÍDO',590,26)}}
+function barr(x,y,a){cx.save();cx.translate(x,y);cx.fillStyle='#16202c';cx.fillRect(-4,-4,8,8);cx.rotate(-a*Math.PI/2.2);cx.fillStyle=a>.5?'#2fbf71':'#ff5d5d';cx.fillRect(0,-2.5,34,5);cx.restore()}
+
+/* ----- bucle ----- */
+let last=performance.now(),cuenta=0;
+function tick(now){const dt=Math.min(.1,(now-last)/1000);last=now;
+  if(S){S.hora+=dt*S.vel/60;
+    barrera.ent+=((S.carros.some(c=>c.estado==='entra'&&c.x<190&&c.c.sentido==='Entrada')?1:0)-barrera.ent)*Math.min(1,dt*6);
+    barrera.sal+=((S.carros.some(c=>c.estado==='sale'&&c.x<190)?1:0)-barrera.sal)*Math.min(1,dt*6);
+    actualizarCarros(dt);
+    const c=S.caso;
+    if(c&&c.pregunta>0){c.pregunta-=dt*S.vel;if(c.pregunta<=0){c.pregunta=0;if(S.apagon>0||!c.cito){c.cito={texto:'No había a quién consultar.',responde:false};c.cito_ok=false}else{c.cito_ok=c.cito.responde;}panel()}}
+    if(c&&c.eval&&S.modo==='auto'&&c.eval.res!=='revisar'&&c.car.estado==='espera'){S.tAuto-=dt*S.vel;if(S.tAuto<=0){S.tAuto=3;ejecutar(c,c.eval.res==='autorizado','Automático','')}}
+    else if(!c||c.car.estado!=='espera')S.tAuto=3;
+    if(S.apagon>0){S.apagon-=dt;if(S.apagon<=0){S.apagon=0;toast('Volvió la luz: el sistema se reinicia y reevalúa.');if(S.caso){S.caso.eval=evaluar(S.caso)}render()}}
+    if($('cLleg').checked&&!S.caso&&(cuenta+=dt*S.vel)>8){cuenta=0;generar(rnd()<.6?'Entrada':'Salida')}
+    if(Math.floor(now/1000)!==Math.floor((now-dt*1000)/1000)){hud();if(S.caso&&(S.caso.pregunta>0||S.apagon>0||(S.modo==='auto'&&S.caso.eval&&S.caso.eval.res!=='revisar')))panel()}
+    draw()}
+  requestAnimationFrame(tick)}
+
+/* ----- controles ----- */
+function modo(m){S.modo=m;$('mMan').setAttribute('aria-pressed',m==='manual');$('mAut').setAttribute('aria-pressed',m==='auto');S.tAuto=3;panel()}
+function vel(v){S.vel=v;$('v1').setAttribute('aria-pressed',v===1);$('v2').setAttribute('aria-pressed',v===2)}
+$('bEnt').onclick=()=>generar('Entrada');$('bSal').onclick=()=>generar('Salida');
+$('mMan').onclick=()=>modo('manual');$('mAut').onclick=()=>modo('auto');$('v1').onclick=()=>vel(1);$('v2').onclick=()=>vel(2);
+$('bApag').onclick=()=>{if(S.apagon>0)return;S.apagon=25;toast('Apagón: el sistema cae. Decida con lo que ve.');if(S.caso){S.caso.eval=null;S.caso.cito_ok=null}render()};
+$('bReset').onclick=()=>{barrera={ent:0,sal:0};nuevoEstado();$('metr').hidden=true;render();toast('Simulación reiniciada.')};
+$('bMet').onclick=()=>{const m=$('metr');m.hidden=!m.hidden;if(!m.hidden)metricas()};
+$('bCopy').onclick=()=>{const t='hora,sentido,placa,persona,categoria,decision,por,detalle,nota\n'+S.mov.map(m=>[m.hora,m.sent,m.placa,m.quien,m.cat,m.dec,m.por,'"'+m.det+'"','"'+m.nota+'"'].join(',')).join('\n');
+  try{navigator.clipboard.writeText(t).then(()=>toast('Historial copiado.'),()=>toast('No se pudo copiar en este navegador.'))}catch(e){toast('No se pudo copiar en este navegador.')}};
+nuevoEstado();render();requestAnimationFrame(tick);
+</script>
