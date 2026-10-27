@@ -13,6 +13,8 @@ Proyecto académico de **Diseño de Software I** (Escuela Tecnológica Instituto
 |---|---|---|
 | [`simulador/`](simulador/) | Simulador 3D en Godot 4.7 (GDScript): garita, barreras, parqueadero, guarda y administración | Pruebas automáticas del núcleo de reglas: 0 fallos. Sonido y equipos físicos sin probar |
 | [`prototipo-arduino/`](prototipo-arduino/) | Núcleo de reglas en C++ (`cispph_core.h`), sketch de Arduino UNO y pruebas en PC | Reglas: 23 pruebas, 0 fallos. Sketch ejecutado en simulación de PC; **sin probar en hardware ni compilado con la cadena de Arduino** |
+| [`sistema-python/`](sistema-python/) | Programa de escritorio (CustomTkinter + OpenCV + face_recognition + SQLite) con reglas separadas en `nucleo.py` y puente opcional con Arduino | Reglas y puente: 22 pruebas, 0 fallos. **Ventana, cámara, reconocimiento facial y Arduino físico sin probar** |
+| [`web/`](web/index.html) | Página del proyecto (quiénes somos, cómo funciona, documentos, simulador ligero). Un solo archivo HTML | Probada solo en sintaxis; publicable con GitHub Pages |
 | [`docs/documentos/`](docs/documentos/) | Documentos del proyecto en formato APA 7 (.docx / .xlsx) | Versión 2.0, pendientes de validación del docente |
 | [`docs/uml/`](docs/uml/) | Fuentes PlantUML y imágenes de los diagramas | Generados con PlantUML |
 
@@ -46,6 +48,31 @@ Reglas principales (propuestas del equipo, ver [`docs/documentos`](docs/document
 ### Arquitectura
 
 La lógica de decisión está **separada de la interfaz y del hardware**. En el simulador vive en el *autoload* `Sistema` (GDScript); en el prototipo, en `cispph_core.h` (C++ sin dependencias de Arduino), por lo que las mismas reglas se prueban con `g++` en un PC antes de cargarlas en el microcontrolador. Ambas implementaciones siguen el mismo diseño de reglas; no comparten código.
+
+## Arquitectura propuesta con hardware
+
+Cámaras y lector → **computador principal** (reconoce, decide con las reglas y guarda en la base de datos) → cable USB → **Arduino** (abre la pluma, pita y muestra texto). Computador y Arduino van conectados a una **UPS** para seguir operando si falla la luz.
+
+Autonomía de la UPS: `horas ≈ (Wh de la batería × eficiencia) ÷ consumo en W`. Hay que medir el consumo real; las 24 horas son una meta, no un dato comprobado.
+
+| Para qué | Librería | Estado |
+|---|---|---|
+| Cámara | `opencv-python` (PC), `picamera2` (Raspberry Pi) | Sin probar con cámara real |
+| Rostros | `face_recognition` (dlib), umbral 0.55 | Sin probar en este entorno |
+| Ventana | `customtkinter`, `Pillow` | Sin probar en este entorno |
+| Arduino desde el PC | `pyserial` | Probado con conexión simulada |
+| Placas | `easyocr`, `pytesseract`, Plate Recognizer, OpenALPR (AGPL) | Candidatas, sin evaluar |
+| Modelo de carro | — | No evaluado |
+
+Órdenes PC → Arduino por serie (9600 baudios, una por línea): `ABRIR`, `DENEGAR`, `LCD,línea1|línea2`, `PING`. Ver [`sistema-python/README.md`](sistema-python/README.md).
+
+## Dos sistemas, mismas reglas
+
+| | Simulador (Godot) | Sistema Python |
+|---|---|---|
+| Para qué | Demostrar todo el flujo sin hardware | Operar con cámara y rostros reales |
+| Reglas | Autoload `Sistema` | `nucleo.py` |
+| Pruebas | 0 fallos | 22 pruebas, 0 fallos |
 
 ## Simulador (Godot)
 

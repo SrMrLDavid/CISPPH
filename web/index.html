@@ -1,0 +1,266 @@
+<title>CISPPH Control de Acceso</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: cabecera fija con pestañas; una sección visible a la vez; simulador como pestaña propia. */
+:root{
+  --bg:#f3f6f4; --card:#ffffff; --ink:#14231c; --mute:#4d6258; --line:#d3ddd7;
+  --acc:#1f6b4a; --acc-ink:#ffffff; --ok:#1b7a3d; --warn:#9a6200; --bad:#b3261e;
+  --okbg:#e2f3e8; --warnbg:#fbefd0; --badbg:#fae1de;
+  --f-d:'Bricolage Grotesque',system-ui,sans-serif; --f-b:'Source Sans 3',system-ui,sans-serif; --f-m:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1a15; --card:#17261f; --ink:#e6f0ea; --mute:#9db3a7; --line:#2b4036; --acc:#5fc994; --acc-ink:#07150e;
+  --ok:#6fd592; --warn:#e8b64c; --bad:#ff8a80; --okbg:#173a26; --warnbg:#3a2f12; --badbg:#44201d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1a15; --card:#17261f; --ink:#e6f0ea; --mute:#9db3a7; --line:#2b4036; --acc:#5fc994; --acc-ink:#07150e;
+  --ok:#6fd592; --warn:#e8b64c; --bad:#ff8a80; --okbg:#173a26; --warnbg:#3a2f12; --badbg:#44201d; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 var(--f-b);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.wrap{max-width:980px;margin:0 auto}
+header{padding-block:28px 12px}
+h1{font:800 clamp(1.9rem,5vw,3rem)/1.05 var(--f-d);margin:0 0 8px;text-wrap:balance}
+h2{font:600 1.5rem/1.2 var(--f-d);margin:0 0 10px;text-wrap:balance}
+h3{font:600 1.1rem/1.3 var(--f-d);margin:0 0 6px}
+p{margin:0 0 12px;max-width:68ch} .mute{color:var(--mute)}
+.tag{font:500 .8rem var(--f-m);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+nav{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;display:flex;gap:6px;flex-wrap:wrap;padding-block:8px;border-bottom:1px solid var(--line)}
+button,.btn{font:600 .95rem var(--f-b);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{border-color:var(--acc)}
+button:focus-visible,.btn:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+nav button[aria-selected="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+section{display:none;padding-block:22px} section.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.pill{display:inline-block;font:600 .8rem var(--f-b);padding:2px 10px;border-radius:99px}
+.ok{background:var(--okbg);color:var(--ok)} .warn{background:var(--warnbg);color:var(--warn)} .bad{background:var(--badbg);color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:.95rem} th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.scroll{overflow-x:auto}
+details{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+summary{cursor:pointer;font-weight:600}
+code,pre{font-family:var(--f-m);font-size:.85rem} pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;margin:8px 0}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .card{flex:1 1 150px;text-align:center} .arrow{align-self:center;color:var(--mute)}
+/* simulador */
+.sim{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px} @media(max-width:700px){.sim{grid-template-columns:1fr}}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-block:8px}
+.gate{height:14px;border-radius:7px;background:var(--line);position:relative;margin-block:10px}
+.gate i{position:absolute;left:0;top:0;bottom:0;width:100%;border-radius:7px;background:var(--bad);transition:width .5s,background .3s;transform-origin:left}
+.gate.open i{width:18%;background:var(--ok)}
+.lcd{font:500 1rem var(--f-m);background:#0d2b1c;color:#9ff0c0;border-radius:8px;padding:10px 12px;min-height:3.6em;white-space:pre}
+.log{max-height:260px;overflow:auto;font-size:.9rem}.log div{padding:5px 0;border-bottom:1px solid var(--line)}
+.sw{margin-left:auto}
+@media (prefers-reduced-motion:reduce){.gate i{transition:none}}
+footer{padding-block:20px;color:var(--mute);font-size:.9rem}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="tag">Proyecto de clase · Desarrollo de Software · ETITC</div>
+  <h1>CISPPH: control de acceso al parqueadero de un conjunto</h1>
+  <p>Un sistema que revisa quién entra y sale del parqueadero de <strong>Robles del Norte P.H.</strong> (conjunto ficticio), aplica las reglas del conjunto y guarda un registro de todo.</p>
+</header>
+
+<nav role="tablist" id="tabs">
+  <button role="tab" data-t="quienes" aria-selected="true">Quiénes somos</button>
+  <button role="tab" data-t="como" aria-selected="false">Cómo funciona</button>
+  <button role="tab" data-t="sim" aria-selected="false">Probar simulador</button>
+  <button role="tab" data-t="docs" aria-selected="false">Documentos</button>
+  <button role="tab" data-t="tec" aria-selected="false">Parte técnica</button>
+  <button role="tab" data-t="git" aria-selected="false">GitHub</button>
+  <button class="sw" id="theme" aria-label="Cambiar tema claro u oscuro">Tema</button>
+</nav>
+
+<section id="quienes" class="on">
+  <h2>Quiénes somos</h2>
+  <p>Somos un equipo de la Tecnología en Desarrollo de Software de la Escuela Tecnológica Instituto Técnico Central (ETITC). Diseñamos CISPPH como proyecto de clase; el cliente es ficticio.</p>
+  <div class="grid">
+    <div class="card"><h3>Luis David Caicedo Rodríguez</h3><span class="tag">Product Owner</span><p class="mute">Define qué necesita el sistema y en qué orden se construye.</p></div>
+    <div class="card"><h3>Edisson David Vargas Castiblanco</h3><span class="tag">Scrum Master</span><p class="mute">Cuida que el equipo trabaje con el método Scrum y sin bloqueos.</p></div>
+    <div class="card"><h3>Javier Santiago Pérez Tobon</h3><span class="tag">Desarrollo</span><p class="mute">Participó en la construcción del sistema.</p></div>
+  </div>
+  <p style="margin-top:14px"><strong>Docente:</strong> José Del Carmen Ortega Castro.</p>
+  <h3>El problema</h3>
+  <p>En un conjunto residencial, el parqueadero se controla muchas veces a mano. Eso causa filas, errores y poca trazabilidad: nadie sabe con certeza quién entró, a qué hora y quién lo autorizó. CISPPH busca que cada entrada y salida quede registrada y que las reglas se apliquen igual para todos.</p>
+  <div class="row"><button class="primary" data-go="como">Ver cómo funciona</button><button data-go="sim">Probar el simulador</button></div>
+</section>
+
+<section id="como">
+  <h2>Cómo funciona</h2>
+  <p>Una persona se acerca a la garita. El sistema la identifica, aplica las reglas y responde. Si el caso es dudoso, decide el guarda.</p>
+  <div class="flow" aria-label="Flujo de acceso">
+    <div class="card"><h3>1. Identifica</h3><span class="mute">Tarjeta o rostro</span></div><span class="arrow">→</span>
+    <div class="card"><h3>2. Revisa reglas</h3><span class="mute">Categoría, cupo, turno</span></div><span class="arrow">→</span>
+    <div class="card"><h3>3. Decide</h3><span class="mute">Autorizado, revisar o denegado</span></div><span class="arrow">→</span>
+    <div class="card"><h3>4. Actúa y registra</h3><span class="mute">Abre la pluma y guarda el evento</span></div>
+  </div>
+  <h3>Las tres respuestas</h3>
+  <p><span class="pill ok">Autorizado</span> se abre la pluma. <span class="pill warn">Revisar</span> el guarda decide. <span class="pill bad">Denegado</span> no se abre y queda registrado el motivo.</p>
+  <h3>Las reglas del prototipo</h3>
+  <div class="scroll"><table>
+    <tr><th>Regla</th><th>Qué hace</th></tr>
+    <tr><td>Categorías</td><td>No VIP, VIS y VIP. Las definiciones usadas son de trabajo y deben confirmarse con el cliente.</td></tr>
+    <tr><td>Cupo de visitantes</td><td>Los visitantes comparten un número limitado de puestos. Si no hay puestos libres, se deniega.</td></tr>
+    <tr><td>Sin doble entrada ni doble salida</td><td>Quien ya está dentro no puede “entrar” otra vez, y quien está fuera no puede “salir”.</td></tr>
+    <tr><td>Intentos fallidos</td><td>Tres intentos fallidos seguidos bloquean el lector por un tiempo.</td></tr>
+    <tr><td>Trabajadores</td><td>Entran solo en su turno; fuera de turno el caso pasa al guarda.</td></tr>
+    <tr><td>Registro</td><td>Toda decisión queda guardada, incluidas las denegadas.</td></tr>
+  </table></div>
+  <p class="mute" style="margin-top:10px">Tarifas, minutos de gracia y cobros no están definidos en este proyecto.</p>
+</section>
+
+<section id="sim">
+  <h2>Simulador (versión ligera)</h2>
+  <p>Elija una persona y pulse Entrar o Salir. Es una demostración de las reglas en esta página; el simulador completo está en el repositorio.</p>
+  <div class="sim">
+    <div class="card">
+      <label for="quien" class="tag">Persona</label><br>
+      <select id="quien"></select>
+      <div class="row">
+        <label for="hora" class="tag" style="align-self:center">Hora</label>
+        <input id="hora" type="number" min="0" max="23" value="10" style="width:5em;padding:8px">
+      </div>
+      <div class="row"><button class="primary" id="bEntrar">Entrar</button><button id="bSalir">Salir</button><button id="bReset">Reiniciar</button></div>
+      <p class="mute" id="estadoPersona"></p>
+      <div id="revisar" hidden class="card" style="background:var(--warnbg)">
+        <strong>El guarda debe decidir</strong>
+        <div class="row"><button class="primary" id="bPermitir">Permitir</button><button id="bNegar">Negar</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lcd" id="lcd" aria-live="polite">Acerque tarjeta</div>
+      <div class="gate" id="gate" role="img" aria-label="Pluma"><i></i></div>
+      <p id="cupo" class="mute"></p>
+    </div>
+  </div>
+  <h3>Registro</h3>
+  <div class="card log" id="log" aria-live="polite"><span class="mute">Aún no hay movimientos.</span></div>
+</section>
+
+<section id="docs">
+  <h2>Documentos del proyecto</h2>
+  <p>Todos están en el repositorio, en formato APA 7 y con el encabezado institucional. Se resumen aquí por etapa.</p>
+  <details open><summary>1. Inicio y organización</summary><p>Acta de inicio, definición de roles, informe EDT/WBS y cronograma.</p></details>
+  <details><summary>2. Caso y contexto</summary><p>Caso del cliente y narrativa del proyecto.</p></details>
+  <details><summary>3. Investigación</summary><p>Cuestionarios (general y guarda), observación directa e indirecta, normativa y legal (incluye Ley 675 de 2001), y la definición de VIS, VIP y No VIP.</p></details>
+  <details><summary>4. Análisis</summary><p>Estado del arte, herramientas de lectura de placas, plataformas no-code, ingeniería de requisitos y actores.</p></details>
+  <details><summary>5. Gestión Scrum</summary><p>Documento de Scrum, historias de usuario, Product Backlog y burndown.</p></details>
+  <details><summary>6. Diseño</summary><p>Procesos AS-IS y TO-BE (estilo BPMN), modelado UML, modelo entidad-relación con diccionario de datos, documento de diseño SDD (IEEE 1016) y diseño UI/UX.</p></details>
+  <details><summary>7. Propuesta y pruebas</summary><p>Canvas Lean, mapa de la propuesta, informe de pruebas y presentación.</p></details>
+  <details><summary>Qué dijo el profesor y qué agregó el equipo</summary><p>Un documento separa lo pedido por el docente de lo que el equipo añadió, y de lo que aún debe confirmarse con él.</p></details>
+</section>
+
+<section id="tec">
+  <h2>Parte técnica</h2>
+  <h3>Arquitectura propuesta</h3>
+  <div class="flow">
+    <div class="card"><h3>Cámaras y lector</h3><span class="mute">Ven rostro, placa o tarjeta</span></div><span class="arrow">→</span>
+    <div class="card"><h3>Computador principal</h3><span class="mute">Reconoce, decide y guarda</span></div><span class="arrow">→ USB →</span>
+    <div class="card"><h3>Arduino</h3><span class="mute">Pluma, pitido y pantalla</span></div>
+  </div>
+  <p>Todo se conecta a una <strong>UPS</strong> para seguir funcionando si falla la luz. La autonomía se calcula así: <code>horas ≈ (Wh de la batería × eficiencia) ÷ consumo en W</code>. Hay que medir el consumo real; llegar a 24 horas es una meta, no un dato probado.</p>
+  <h3>Dos sistemas</h3>
+  <div class="grid">
+    <div class="card"><h3>Simulador (Godot)</h3><p class="mute">Demuestra todo el flujo en pantalla, sin hardware. Probado con pruebas automáticas.</p></div>
+    <div class="card"><h3>Sistema en Python</h3><p class="mute">Programa de escritorio con cámara y reconocimiento facial. Las reglas están probadas; la ventana, la cámara y el reconocimiento facial no se han probado aún.</p></div>
+  </div>
+  <h3>Librerías</h3>
+  <div class="scroll"><table>
+    <tr><th>Para qué</th><th>Librería</th><th>Estado</th></tr>
+    <tr><td>Cámara</td><td>opencv-python (PC) · picamera2 (Raspberry Pi)</td><td>Sin probar con cámara real</td></tr>
+    <tr><td>Rostros</td><td>face_recognition (dlib)</td><td>Sin probar aquí</td></tr>
+    <tr><td>Ventana</td><td>customtkinter, Pillow</td><td>Sin probar aquí</td></tr>
+    <tr><td>Arduino desde el PC</td><td>pyserial</td><td>Probado con conexión simulada</td></tr>
+    <tr><td>Placas</td><td>easyocr, pytesseract, Plate Recognizer, OpenALPR</td><td>Candidatas, sin evaluar</td></tr>
+    <tr><td>Modelo de carro</td><td>—</td><td>No evaluado</td></tr>
+  </table></div>
+  <p class="mute" style="margin-top:10px">El prototipo Arduino tiene 23 pruebas de sus reglas y una simulación en PC. El sketch no se ha cargado en una placa real.</p>
+</section>
+
+<section id="git">
+  <h2>El repositorio en GitHub</h2>
+  <p>GitHub guarda todo el código y los documentos del proyecto, con el historial de cada cambio. Repositorio: <a href="https://github.com/SrMrLDavid/CISPPH">SrMrLDavid/CISPPH</a>.</p>
+  <div class="scroll"><table>
+    <tr><th>Carpeta</th><th>Qué contiene</th></tr>
+    <tr><td><code>simulador/</code></td><td>Simulador en Godot 4 del control de acceso.</td></tr>
+    <tr><td><code>sistema-python/</code></td><td>Programa con cámara y reconocimiento facial, más su puente con Arduino.</td></tr>
+    <tr><td><code>prototipo-arduino/</code></td><td>Sketch para Arduino UNO, reglas en C++ y sus pruebas.</td></tr>
+    <tr><td><code>docs/documentos/</code></td><td>Todos los documentos del proyecto.</td></tr>
+    <tr><td><code>docs/uml/</code></td><td>Diagramas UML, ER y de procesos.</td></tr>
+    <tr><td><code>web/</code></td><td>Esta página.</td></tr>
+  </table></div>
+  <h3>Cómo usarlo</h3>
+  <pre>git clone https://github.com/SrMrLDavid/CISPPH.git
+cd CISPPH/sistema-python
+python -m unittest discover -s pruebas</pre>
+</section>
+
+<footer>Proyecto académico con cliente ficticio. Fecha de la versión: 26/10/2026.</footer>
+</div>
+
+<script>
+// Pestañas
+const tabs=[...document.querySelectorAll('#tabs [role=tab]')];
+function ir(id){document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===id));
+  tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.t===id));
+  try{history.replaceState(null,'','#'+id)}catch(e){}}
+tabs.forEach(t=>t.onclick=()=>ir(t.dataset.t));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>ir(b.dataset.go));
+const h=location.hash.slice(1); if(document.getElementById(h)&&h)ir(h);
+document.getElementById('theme').onclick=()=>{const r=document.documentElement;
+  const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme=dark?'light':'dark'};
+
+// Simulador ligero: mismas reglas del prototipo
+const PUESTOS=5, MAX_FALLOS=3;
+const PERSONAS=[
+ {id:'carlos',n:'Carlos (residente, No VIP)',cat:'No VIP',conocido:true},
+ {id:'marta',n:'Marta (VIP)',cat:'VIP',conocido:true},
+ {id:'juan',n:'Juan (visitante, VIS)',cat:'VIS',conocido:true},
+ {id:'luisa',n:'Luisa (visitante, VIS)',cat:'VIS',conocido:true},
+ {id:'ana',n:'Ana (trabajadora, turno 6 a 18)',cat:'Trabajador',conocido:true,turno:[6,18]},
+ {id:'x',n:'Persona desconocida',cat:'—',conocido:false}];
+let dentro, fallos, bloqueado, pend, log;
+const $=id=>document.getElementById(id);
+function reset(){dentro=new Set();fallos=0;bloqueado=false;pend=null;log=[];$('revisar').hidden=true;
+  $('lcd').textContent='Acerque tarjeta';cerrar();$('log').innerHTML='<span class="mute">Aún no hay movimientos.</span>';pintar()}
+function visitantes(){return PERSONAS.filter(p=>p.cat==='VIS'&&dentro.has(p.id)).length}
+function pintar(){const p=persona();
+  $('estadoPersona').textContent=p.conocido?(dentro.has(p.id)?'Está dentro del parqueadero.':'Está fuera del parqueadero.'):'No está registrada.';
+  $('cupo').textContent='Puestos de visitantes ocupados: '+visitantes()+' de '+PUESTOS+(bloqueado?' · Lector bloqueado':'')}
+function persona(){return PERSONAS.find(p=>p.id===$('quien').value)}
+function abrir(){$('gate').classList.add('open');setTimeout(cerrar,2500)}
+function cerrar(){$('gate').classList.remove('open')}
+function evaluar(p,sentido,hora){
+  if(bloqueado)return['Denegado','Lector bloqueado por intentos fallidos'];
+  if(!p.conocido){fallos++;if(fallos>=MAX_FALLOS){bloqueado=true;setTimeout(()=>{bloqueado=false;fallos=0;pintar()},15000);return['Denegado','Tercer intento fallido: lector bloqueado 15 s']}return['Denegado','Persona no registrada ('+fallos+'/'+MAX_FALLOS+')']}
+  fallos=0;
+  if(sentido==='E'&&dentro.has(p.id))return['Denegado','Ya está dentro (doble entrada)'];
+  if(sentido==='S'&&!dentro.has(p.id))return['Denegado','No está dentro (doble salida)'];
+  if(sentido==='E'&&p.cat==='VIS'&&visitantes()>=PUESTOS)return['Denegado','No hay puestos de visitantes libres'];
+  if(p.turno&&(hora<p.turno[0]||hora>=p.turno[1]))return['Revisar','Fuera de su turno: decide el guarda'];
+  return['Autorizado','Cumple las reglas']}
+function mover(sentido){
+  if(pend)return;
+  const p=persona(),hora=+$('hora').value||0,[d,m]=evaluar(p,sentido,hora);
+  if(d==='Revisar'){pend={p,sentido,hora};$('revisar').hidden=false;$('lcd').textContent='REVISAR\n'+p.n.split(' (')[0];anotar(p,sentido,d,m);pintar();return}
+  aplicar(p,sentido,d,m)}
+function aplicar(p,sentido,d,m){
+  if(d==='Autorizado'){sentido==='E'?dentro.add(p.id):dentro.delete(p.id);abrir()}
+  $('lcd').textContent=d.toUpperCase()+'\n'+(p.conocido?p.n.split(' (')[0]:'Desconocido');
+  anotar(p,sentido,d,m);pintar()}
+function anotar(p,s,d,m){const t=String(+$('hora').value||0).padStart(2,'0')+':00';
+  const cls=d==='Autorizado'?'ok':d==='Revisar'?'warn':'bad';
+  if(!log.length)$('log').innerHTML='';
+  log.push(1);const el=document.createElement('div');
+  el.innerHTML='<span class="pill '+cls+'">'+d+'</span> '+t+' · '+(s==='E'?'Entrada':'Salida')+' · '+(p.conocido?p.n.split(' (')[0]:'Desconocido')+' · <span class="mute">'+m+'</span>';
+  $('log').prepend(el)}
+function decidir(ok){if(!pend)return;const{p,sentido}=pend;pend=null;$('revisar').hidden=true;
+  aplicar(p,sentido,ok?'Autorizado':'Denegado',ok?'Permitido por el guarda':'Negado por el guarda')}
+$('quien').innerHTML=PERSONAS.map(p=>'<option value="'+p.id+'">'+p.n+'</option>').join('');
+$('quien').onchange=pintar;$('bEntrar').onclick=()=>mover('E');$('bSalir').onclick=()=>mover('S');
+$('bReset').onclick=reset;$('bPermitir').onclick=()=>decidir(true);$('bNegar').onclick=()=>decidir(false);
+reset();
+</script>

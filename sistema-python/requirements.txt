@@ -1,0 +1,9 @@
+# Interfaz y cámara
+customtkinter
+Pillow
+opencv-python
+Click
+# Reconocimiento facial (ver README: dlib y face-recognition se instalan con pasos especiales en Windows)
+setuptools<81
+# Puente opcional con Arduino (pluma, buzzer, pantalla)
+pyserial

@@ -139,7 +139,34 @@ bool leerUid(uint8_t uid[LONG_UID]) {
 }
 #endif
 
+#ifndef SIMULACION_SERIAL
+// Órdenes opcionales del computador (una por línea): ABRIR | DENEGAR | LCD,línea1|línea2 | PING
+// Así el PC decide (cámara, base de datos) y el Arduino solo ejecuta. Ver sistema-python/puente_arduino.py.
+void atenderPC() {
+  static char buf[40]; static uint8_t n = 0;
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c != '\n' && c != '\r') { if (n < sizeof buf - 1) buf[n++] = c; continue; }
+    buf[n] = 0; n = 0;
+    if (!strcmp(buf, "ABRIR")) {
+      pitar(1, 120); pluma.write(ANGULO_ABIERTO); delay(TIEMPO_ABIERTO_MS); pluma.write(ANGULO_CERRADO);
+      Serial.println(F("OK ABRIR"));
+    } else if (!strcmp(buf, "DENEGAR")) {
+      pitar(3, 120); Serial.println(F("OK DENEGAR"));
+    } else if (!strcmp(buf, "PING")) {
+      Serial.println(F("PONG"));
+    } else if (!strncmp(buf, "LCD,", 4)) {
+      char *sep = strchr(buf + 4, '|');
+      if (sep) { *sep = 0; mostrar(buf + 4, sep + 1); Serial.println(F("OK LCD")); }
+    }
+  }
+}
+#endif
+
 void loop() {
   uint8_t uid[LONG_UID];
+#ifndef SIMULACION_SERIAL
+  atenderPC();
+#endif
   if (leerUid(uid)) procesar(uid);
 }

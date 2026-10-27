@@ -4,3 +4,7 @@ export/
 test_core
 sim_pc
 .DS_Store
+data/
+fotos_usuarios/
+*.db
+__pycache__/
