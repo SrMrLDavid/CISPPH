@@ -3,7 +3,7 @@ extends Node
 # Prueba de punta a punta del simulador (requiere render: usar xvfb-run). Verifica la logica y el
 # flujo de los vehiculos, no la apariencia. Salida: lineas OK/FALLO y un codigo de salida.
 var fallos: int = 0
-var dir_cap: String = "/tmp/claude-0/-home-claude/b0655028-f712-5b83-9477-06ad29451f53/scratchpad/"
+var dir_cap: String = "user://capturas/"
 var P: Node
 var raiz_esc: Node
 

@@ -1,6 +1,6 @@
 # CISPPH — Simulador 3D de control de acceso vehicular
 
-> v5: ver docs/INFORME_SIMULADOR_v5.md y docs/MATRIZ_TRAZABILIDAD_SIMULADOR.md
+> Ver docs/MATRIZ_TRAZABILIDAD_SIMULADOR.md y docs/GUIA_EXPOSICION.md
 
 **Proyecto académico:** Control de Ingreso y Salida para Parqueaderos de Propiedad Horizontal
 **Institución:** ETITC · **Asignatura:** Diseño de Software I · **Entrega:** 21/11/2026
@@ -52,16 +52,16 @@ scenes/principal.tscn    Un nodo con scripts/principal.gd (todo lo demás se con
 scripts/sistema.gd       Datos + reglas + persistencia (JSON en user://) — autoload
 scripts/escenario3d.gd   Mundo 3D, cámaras, barreras, rutas, capturas
 scripts/vehiculo3d.gd    Vehículos procedurales y movimiento
-scripts/generador_casos.gd  Casos de acceso (adaptados del «protocolo Umbral» de Ecos del Cosmos)
+scripts/generador_casos.gd  Generador de los casos de acceso
 scripts/principal.gd     Controlador (carriles, decisiones, tráfico)
 scripts/interfaz.gd      Toda la interfaz
 scripts/audio_sim.gd     Sonidos sintéticos
 scripts/persona3d.gd     Personas procedurales con brazos, piernas y animación (guardas, civiles, policía, ladrón)
 scripts/icono_menu.gd    Botones-icono del menú (engranaje, play, mapa, salir)
 scripts/ajustes.gd       Volumen, gráficos y controles (se guardan en user://cispph_ajustes.cfg)
-scripts/rostro_vista.gd  Rostro caricaturizado procedural (de Ecos del Cosmos)
-tools/pruebas/           Pruebas: prueba_sistema.gd (reglas), prueba_simulador.tscn (punta a punta), capturas
-docs/                    Este README, informes (v1–v4.2) y guía de exposición
+scripts/rostro_vista.gd  Rostro caricaturizado procedural
+tools/pruebas/           Pruebas: prueba_sistema.gd (reglas) y prueba_simulador.tscn (punta a punta)
+docs/                    Este README, matriz de trazabilidad y guía de exposición
 ```
 
 ## Pruebas
@@ -69,7 +69,7 @@ docs/                    Este README, informes (v1–v4.2) y guía de exposició
 - Punta a punta (necesita render; en Linux con `xvfb-run`): `godot --path . res://tools/pruebas/prueba_simulador.tscn`
 
 ## Novedades v4
-Apagón con sistema caído, enviar a preguntar, estrés y monitor de cámaras orientables (ver INFORME_SIMULADOR_v4.md).
+Apagón con sistema caído, enviar a preguntar, estrés y monitor de cámaras orientables.
 
 ## Novedades v3
-Menú inicial, ajustes, tarjeta «¿Qué es CISPPH?», cinemática de inicio y tareas del turno, conductores que caminan al edificio, robo con policía, dinero del turno. Detalle y límites en `INFORME_SIMULADOR_v3.md`.
+Menú inicial, ajustes, tarjeta «¿Qué es CISPPH?», cinemática de inicio y tareas del turno, conductores que caminan al edificio, robo con policía, dinero del turno.

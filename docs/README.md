@@ -1,6 +1,6 @@
 # Documentos del proyecto
 
-Todos los documentos están en [`documentos/`](documentos/) con el nombre de su tarjeta de Trello. Siguen APA 7 y el encabezado institucional del docente.
+Todos los documentos están en [`documentos/`](documentos/) con el nombre de su tarjeta de Trello. Siguen APA 7 y el encabezado institucional.
 
 | Tarjeta de Trello | Lista | Archivo |
 |---|---|---|
@@ -30,13 +30,13 @@ Todos los documentos están en [`documentos/`](documentos/) con el nombre de su 
 | Diseño UI/UX | En proceso | 08 Diseño UI-UX.docx |
 | Canva – Lean Canvas, Mapa de Empatía y Propuesta de Valor | Lista de tareas | 09 Canva Lean Canvas Mapa de Empatía y Propuesta de Valor.docx |
 | Pruebas y validación del prototipo | Lista de tareas | 10 Pruebas y validación del prototipo.docx |
-| Presentación final y subida de documentos v2.0 a OneDrive | Lista de tareas | 10 Presentación final.pptx, 00 Índice Maestro.docx |
+| Presentación final y subida de documentos v2.0 a OneDrive | Lista de tareas | 10 Presentación final.pptx, 00 Bitácora del proyecto.docx |
 | Simulador 3D del control de acceso (Godot) | En proceso | 11 Manual del simulador 3D.docx |
 | Prototipo Arduino (RFID + servo + LCD) | En proceso | 11 Manual del prototipo Arduino.docx |
 | Sistema Python de control de acceso (cámara y rostros) | Validando | 11 Manual del sistema Python.docx |
 | Repositorio GitHub (SrMrLDavid/CISPPH) | Validando | 11 Guía del repositorio GitHub.docx |
 | Página web del proyecto (quiénes somos y cómo funciona) | En proceso | — |
 
-Otros archivos: `00 Qué pidió el profesor y qué agregó el equipo.docx` y la carpeta [`uml/`](uml/) con las imágenes de los diagramas.
+La bitácora del proyecto es `00 Bitácora del proyecto.docx`. Los diagramas están en la carpeta [`uml/`](uml/) .
 
 La página web del proyecto es `index.html` en esta misma carpeta (también está en `web/`).
