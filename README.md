@@ -2,8 +2,6 @@
 
 Proyecto académico de **Diseño de Software I** (Escuela Tecnológica Instituto Técnico Central, ETITC). Reúne la documentación del proyecto, un **simulador 3D** del control de acceso y un **prototipo con Arduino** cuya lógica se prueba en un computador.
 
-> **Nota.** Para redactar y organizar el material el equipo usó Claude (Anthropic) como herramienta de apoyo; las decisiones y la revisión final corresponden al equipo y al docente.
-
 **Equipo:** Luis David Caicedo Rodríguez (Product Owner) · Edisson David Vargas Castiblanco (Scrum Master) · Javier Santiago Pérez Tobon (Developer)
 **Docente:** José Del Carmen Ortega Castro · **Entrega:** 21/11/2026
 
@@ -101,10 +99,3 @@ g++ -std=c++11 -Wall -Wextra -Wpedantic -o test_core test_core.cpp && ./test_cor
 ## Documentación
 
 Los documentos siguen APA 7 y la numeración de la carpeta del proyecto: acta, roles, caso del cliente, narrativa, normativa, cuestionarios, requisitos, backlog y burndown, Scrum, EDT/cronograma, BPMN, UML, modelo de datos, SDD, UI/UX y herramientas comerciales. Ver [`docs/README.md`](docs/README.md).
-
-## Limitaciones conocidas
-
-- Las necesidades del cliente aún no están validadas con la administración; los umbrales (por ejemplo 3 s por registro) son propuestos.
-- El prototipo Arduino no se ha cableado ni probado con un MFRC522, servo o LCD reales.
-- El sonido del simulador no se ha escuchado y no se probó en un teléfono ni en un `.exe` de Windows.
-- Los estados de entrega los marca el docente, no el equipo.
