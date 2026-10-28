@@ -47,6 +47,7 @@ class TestFlujoReconocimiento(unittest.TestCase):
         self.app.combo_modo = mock.MagicMock()
         from porteria import Porteria
         self.app.porteria = Porteria(self.app.puente)
+        self.app.lector_placas = None
         self.app.entry_placa = mock.MagicMock(); self.app.entry_placa.get.return_value = ""
         for nombre in ("log", "set_estado", "mostrar_popup_bienvenida", "actualizar_tabla_estado", "after", "_denegar"):
             setattr(self.app, nombre, mock.MagicMock())
@@ -71,6 +72,19 @@ class TestFlujoReconocimiento(unittest.TestCase):
             self.reconocer("R", "Entrada")
         pregunta.assert_called_once(); self.app.puente.abrir.assert_not_called()
         self.assertEqual(self.estados(), ["Denegado"])
+
+    def test_placa_leida_sola_por_la_camara_distinta_va_a_revision(self):
+        self.app.lector_placas = mock.MagicMock(disponible=True)
+        self.app.lector_placas.leer.return_value = "ZZZ-999"
+        with mock.patch.object(pp.messagebox, "askyesno", return_value=False) as pregunta:
+            self.reconocer("R", "Entrada")
+        pregunta.assert_called_once(); self.assertEqual(self.estados(), ["Denegado"])
+
+    def test_placa_leida_sola_correcta_entra(self):
+        self.app.lector_placas = mock.MagicMock(disponible=True)
+        self.app.lector_placas.leer.return_value = "RES-111"
+        self.reconocer("R", "Entrada")
+        self.assertEqual(self.estados(), ["Entrada"])
 
     def test_placa_correcta_con_otro_formato_entra(self):
         self.app.entry_placa.get.return_value = "res 111"

@@ -69,6 +69,7 @@ from PIL import Image
 import face_recognition
 import numpy as np
 
+from placa_ocr import LectorPlacas      # lectura automática de placas (EasyOCR o Tesseract, opcional)
 from porteria import Porteria       # pluma y pantalla de la portería (virtuales, con Arduino opcional)
 import nucleo                       # reglas de acceso y base de datos (sin cámara ni GUI)
 from nucleo import hash_password   # SHA-256 de la clave
@@ -292,6 +293,8 @@ class AppAccesoVehicularFinal(ctk.CTk):
             except Exception as e:                  # sin pyserial o sin placa: el sistema sigue funcionando
                 print(f"Arduino no disponible ({e}); se continúa sin pluma física.")
 
+        self.lector_placas = None                   # se carga en segundo plano para no demorar la ventana
+        threading.Thread(target=self._cargar_lector_placas, daemon=True).start()
         self.porteria = Porteria(self.puente)       # pluma y LCD virtuales; también mueven el Arduino si existe
 
         # Mostrar primero la pantalla de inicio de sesión de seguridad
@@ -460,6 +463,16 @@ class AppAccesoVehicularFinal(ctk.CTk):
         if self.camaras_disponibles:
             self.combo_camaras.set(opciones[0])
 
+        self.entry_url = ctk.CTkEntry(
+            frame_right, width=350, height=30,
+            placeholder_text="O pegue la dirección de una cámara IP (rtsp:// o http://)"
+        )
+        self.entry_url.pack(padx=20, pady=(5, 0))
+        ctk.CTkButton(
+            frame_right, text="Conectar cámara por dirección", fg_color="#444444",
+            hover_color="#333333", height=30, command=self.conectar_camara_url
+        ).pack(padx=20, pady=5)
+
         ctk.CTkButton(
             frame_right,
             text="🔍 Buscar Nuevas Cámaras",
@@ -490,6 +503,10 @@ class AppAccesoVehicularFinal(ctk.CTk):
             placeholder_text="Placa del vehículo (opcional), ej. ABC-123"
         )
         self.entry_placa.pack(padx=20, pady=5)
+        ctk.CTkButton(
+            frame_right, text="Leer placa con la cámara", fg_color="#444444",
+            hover_color="#333333", height=30, command=self.leer_placa_ahora
+        ).pack(padx=20, pady=(0, 5))
 
         # Botón para activar el escaneo facial y procesar el movimiento
         self.btn_validar = ctk.CTkButton(
@@ -606,6 +623,47 @@ class AppAccesoVehicularFinal(ctk.CTk):
             )
             self.update_video_ui()
 
+    def conectar_camara_url(self):
+        """Usa una cámara IP o de celular (RTSP/HTTP) en lugar de una cámara USB."""
+        url = self.entry_url.get().strip()
+        if not url:
+            return
+        if self.video_worker.start(url):
+            self.camara_actual_index = url
+            self.log(f"Cámara conectada por dirección: {url}")
+            self.update_video_ui()
+        else:
+            self.log("⚠️ No se pudo abrir esa dirección de cámara.")
+
+    def _cargar_lector_placas(self):
+        self.lector_placas = LectorPlacas()
+        motor = self.lector_placas.motor
+        msg = f"Lectura de placas lista ({motor})." if motor else \
+              "Lectura de placas no disponible: instale easyocr o pytesseract. La placa se puede escribir a mano."
+        try:
+            self.after(0, lambda: self.log(msg))
+        except Exception:
+            pass
+
+    def leer_placa_ahora(self):
+        """Lee la placa del fotograma actual y la escribe en el campo de placa."""
+        placa = self._leer_placa(self.video_worker.get_frame())
+        if placa:
+            self.entry_placa.delete(0, "end")
+            self.entry_placa.insert(0, placa)
+            self.log(f"Placa leída: {placa}")
+        else:
+            self.log("No se pudo leer una placa en la imagen. Acerque la placa o escríbala a mano.")
+
+    def _leer_placa(self, frame):
+        if self.lector_placas is None or not self.lector_placas.disponible or frame is None:
+            return None
+        try:
+            return self.lector_placas.leer(frame)
+        except Exception as e:
+            self.log(f"Error leyendo la placa: {e}")
+            return None
+
     def refrescar_camaras(self):
         """Escanea nuevamente los puertos de video e invoca la actualización del menú visual."""
         self.camaras_disponibles = self.video_worker.list_cameras()
@@ -714,6 +772,11 @@ class AppAccesoVehicularFinal(ctk.CTk):
         cn = nucleo.conectar(DB_FILE)
         decision = nucleo.evaluar_acceso(cn, uid, modo)
         placa_leida = self.entry_placa.get().strip()
+        if not placa_leida:
+            auto = self._leer_placa(frame)           # intenta leerla sola con la cámara
+            if auto:
+                placa_leida = auto
+                self.log(f"Placa leída automáticamente: {auto}")
         if placa_leida and decision.resultado == nucleo.AUTORIZADO and not nucleo.placas_coinciden(placa_leida, placa):
             # El rostro es de la persona, pero el vehículo no es el registrado: lo decide el guarda.
             decision = nucleo.Decision(

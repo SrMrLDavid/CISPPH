@@ -288,7 +288,7 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
   <h3 style="margin-top:30px">Tres piezas, una misma lógica</h3>
   <div class="grid">
     <div class="card"><span class="pill neu">Godot</span><h3 style="margin-top:8px">Simulador 3D</h3><p class="mute">Muestra todo el flujo sin hardware, con 40 puestos, casos de robo y apagones. Las reglas pasan sus pruebas automáticas.</p></div>
-    <div class="card"><span class="pill neu">Python</span><h3 style="margin-top:8px">Sistema con cámara y rostros</h3><p class="mute">Programa de escritorio con base de datos SQLite. Las reglas y el puente con Arduino tienen 30 pruebas que pasan. La ventana, la cámara y el reconocimiento facial no se han probado.</p></div>
+    <div class="card"><span class="pill neu">Python</span><h3 style="margin-top:8px">Sistema con cámara y rostros</h3><p class="mute">Programa de escritorio con base de datos SQLite. Las reglas y el puente con Arduino tienen 37 pruebas que pasan. La ventana, la cámara y el reconocimiento facial no se han probado.</p></div>
     <div class="card"><span class="pill neu">Arduino</span><h3 style="margin-top:8px">Pluma y lector de tarjetas</h3><p class="mute">Reglas en C++ con 23 pruebas que pasan en un PC. No se ha cargado en una placa real.</p></div>
   </div>
   <h3 style="margin-top:30px">Librerías</h3>
@@ -298,7 +298,7 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
     <tr><td>Rostros</td><td>face_recognition (dlib)</td><td><span class="pill warn">Sin probar aquí</span></td></tr>
     <tr><td>Ventana</td><td>customtkinter, Pillow</td><td><span class="pill warn">Sin probar aquí</span></td></tr>
     <tr><td>Arduino desde el PC</td><td>pyserial</td><td><span class="pill ok">Probado con conexión simulada</span></td></tr>
-    <tr><td>Placas</td><td>easyocr, pytesseract, Plate Recognizer, OpenALPR</td><td><span class="pill neu">Candidatas, sin evaluar</span></td></tr>
+    <tr><td>Placas</td><td>easyocr (preferida), pytesseract</td><td><span class="pill warn">Tesseract probado con una imagen generada; falta probar con la cámara</span></td></tr>
     <tr><td>Modelo del carro</td><td>—</td><td><span class="pill neu">No evaluado</span></td></tr>
   </table></div>
 </div></section>

@@ -3,7 +3,7 @@
 Programa de escritorio para la portería de **Robles del Norte P.H.**.
 Funciona como una portería completa con solo un computador y su cámara: la pluma y la pantalla de mensajes aparecen en la ventana, y el Arduino es opcional. Una cámara reconoce el rostro, el sistema consulta las reglas del conjunto y decide: **Autorizado**, **Revisar** (decide el guarda) o **Denegado**. Todo queda registrado.
 
-> **Estado honesto:** las reglas (`nucleo.py`) y el puente con Arduino tienen pruebas automáticas que pasan (30 pruebas). **No se ha probado** en este entorno la ventana (CustomTkinter), la cámara real, `face_recognition`/dlib ni el Arduino físico. Eso se valida en el computador del equipo.
+> **Estado honesto:** las reglas (`nucleo.py`) y el puente con Arduino tienen pruebas automáticas que pasan (37 pruebas). **No se ha probado** en este entorno la ventana (CustomTkinter), la cámara real, `face_recognition`/dlib ni el Arduino físico. Eso se valida en el computador del equipo.
 
 ## Archivos
 | Archivo | Para qué sirve |
@@ -11,12 +11,13 @@ Funciona como una portería completa con solo un computador y su cámara: la plu
 | `parqueadero_pro.py` | Ventana del sistema (login, cámara, registro, historial). Es el programa que se ejecuta. |
 | `nucleo.py` | Reglas y base de datos (SQLite) sin pantalla ni cámara: por eso se puede probar. |
 | `porteria.py` | Pluma y pantalla (LCD) virtuales de la portería; repiten sus órdenes en el Arduino si está conectado. |
+| `placa_ocr.py` | Lee la placa de la imagen de la cámara (EasyOCR o Tesseract) y la acomoda al formato ABC-123 o ABC-12D. |
 | `puente_arduino.py` | Envía órdenes al Arduino por cable USB (abrir pluma, avisar, mostrar texto). Opcional. |
 | `pruebas/` | Pruebas automáticas: `python -m unittest discover -s pruebas` |
 
 ## Instalación (Windows, en este orden)
 ```
-pip install customtkinter Pillow opencv-python Click "setuptools<81" pyserial
+pip install customtkinter Pillow opencv-python Click "setuptools<81" pyserial easyocr
 pip install dlib-bin --no-deps
 pip install face-recognition --no-deps
 pip install face-recognition-models --force-reinstall
@@ -33,7 +34,8 @@ Sin la variable, el sistema funciona igual con la pluma y la pantalla virtuales 
 ## Uso como portería (solo PC y cámara)
 1. Ingrese con el usuario y la clave.
 2. En *Operación* elija la cámara y el punto de control (Entrada o Salida).
-3. Si el guarda lee la placa del vehículo, escríbala en el campo de placa: si no coincide con la registrada a esa persona, el caso pasa a revisión del guarda.
+3. La placa se lee sola con la cámara al validar (o con el botón *Leer placa con la cámara*); también puede escribirla. Si no coincide con la registrada a esa persona, el caso pasa a revisión del guarda.
+   Cámara: sirve cualquier cámara USB, y también una cámara IP o el celular con una app de cámara, pegando su dirección (rtsp:// o http://) en el campo de la ventana.
 4. Pulse *Validar Rostro*. Si todo coincide, la pluma virtual se levanta 3 s y la pantalla saluda; si no, muestra ACCESO DENEGADO con el motivo.
 
 Órdenes (una por línea, 9600 baudios): `ABRIR`, `DENEGAR`, `LCD,línea1|línea2`, `PING`. El Arduino responde `OK ...` o `PONG`.

@@ -7,3 +7,6 @@ Click
 setuptools<81
 # Puente opcional con Arduino (pluma, buzzer, pantalla)
 pyserial
+# Lectura de placas (elija una: EasyOCR es más preciso y pesado; Tesseract necesita instalar además el programa)
+easyocr
+pytesseract
