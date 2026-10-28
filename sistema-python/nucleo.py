@@ -44,6 +44,17 @@ def hash_password(clave: str) -> str:
     return hashlib.sha256(clave.encode("utf-8")).hexdigest()
 
 
+def normalizar_placa(texto: str) -> str:
+    """Pone la placa en mayúsculas y sin espacios ni guiones, para compararla sin errores de escritura."""
+    return "".join(ch for ch in (texto or "").upper() if ch.isalnum())
+
+
+def placas_coinciden(leida: str, registrada: str) -> bool:
+    """True si la placa leída es la registrada (ignora mayúsculas, espacios y guiones)."""
+    a, b = normalizar_placa(leida), normalizar_placa(registrada)
+    return bool(a) and a == b
+
+
 def ahora_texto(ahora: Optional[datetime.datetime] = None) -> str:
     return (ahora or datetime.datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
 

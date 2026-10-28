@@ -1,7 +1,7 @@
 # Informe v5 — Integración de los documentos del proyecto
 
 ## Qué funciona (probado con la prueba automática: 0 fallos; render con GL por software)
-- Caso ilustrativo «Robles del Norte P.H.» (letrero y textos). Escala reducida: 25 puestos de residentes (R-01..R-25) y 15 de visitantes (V-01..V-15); el caso describe 210 y 15.
+- Caso «Robles del Norte P.H.» (letrero y textos). Escala reducida: 25 puestos de residentes (R-01..R-25) y 15 de visitantes (V-01..V-15); el caso describe 210 y 15.
 - Categorías No VIP / VIS / VIP como **definición de trabajo, pendiente de ratificar** (sin tarifas, prioridades ni cupos). Visibles en inspección, historial, usuarios; formulario con «Categoría VIP» y motivo.
 - Trazabilidad: cada movimiento guarda categoría y «Registrado por» (guardia/administrador o Automático).
 - Contador «Visitantes libres X/15» en el HUD.
@@ -10,7 +10,7 @@
 
 ## Limitaciones (sin inventar)
 - El tiempo medido incluye el tiempo de pensar de la persona; **no** mide RNF-003 (umbral propuesto, no validado).
-- Los datos son ilustrativos; los participantes, cambios y estado de la tabla de validación los completa el equipo.
+- Los participantes, cambios y estado de la tabla de validación los completa el equipo.
 - Sin probar: sonido (no puedo oírlo), celular físico, exe de Windows.
 - No hecho: modo comparación AS-IS (talonario) vs TO-BE, mapa de sótanos, controles táctiles, reporte por rango de fechas (RF-010 parcial: historial sí, exportar por fechas no).
 

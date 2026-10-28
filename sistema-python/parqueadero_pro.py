@@ -63,11 +63,13 @@ os.environ["OPENCV_LOG_LEVEL"] = "ERROR"
 
 import cv2
 import customtkinter as ctk
+import tkinter as tk
 from tkinter import messagebox
 from PIL import Image
 import face_recognition
 import numpy as np
 
+from porteria import Porteria       # pluma y pantalla de la portería (virtuales, con Arduino opcional)
 import nucleo                       # reglas de acceso y base de datos (sin cámara ni GUI)
 from nucleo import hash_password   # SHA-256 de la clave
 
@@ -290,6 +292,8 @@ class AppAccesoVehicularFinal(ctk.CTk):
             except Exception as e:                  # sin pyserial o sin placa: el sistema sigue funcionando
                 print(f"Arduino no disponible ({e}); se continúa sin pluma física.")
 
+        self.porteria = Porteria(self.puente)       # pluma y LCD virtuales; también mueven el Arduino si existe
+
         # Mostrar primero la pantalla de inicio de sesión de seguridad
         self._mostrar_login()
 
@@ -480,6 +484,13 @@ class AppAccesoVehicularFinal(ctk.CTk):
         )
         self.combo_modo.pack(padx=20, pady=5)
 
+        # Placa del vehículo (opcional): si se escribe, debe coincidir con la registrada a la persona
+        self.entry_placa = ctk.CTkEntry(
+            frame_right, width=350, height=35,
+            placeholder_text="Placa del vehículo (opcional), ej. ABC-123"
+        )
+        self.entry_placa.pack(padx=20, pady=5)
+
         # Botón para activar el escaneo facial y procesar el movimiento
         self.btn_validar = ctk.CTkButton(
             frame_right,
@@ -513,6 +524,19 @@ class AppAccesoVehicularFinal(ctk.CTk):
         )
         self.lbl_estado.pack(pady=(0, 8))
 
+        # Pluma y pantalla de la portería (virtuales; el Arduino, si existe, los repite físicamente)
+        frame_porteria = ctk.CTkFrame(frame_right, fg_color="#2D2D2D", corner_radius=8)
+        frame_porteria.pack(padx=20, pady=(0, 10), fill="x")
+        self.canvas_pluma = tk.Canvas(frame_porteria, width=210, height=84, bg="#2D2D2D", highlightthickness=0)
+        self.canvas_pluma.pack(side="left", padx=10, pady=8)
+        frame_lcd = ctk.CTkFrame(frame_porteria, fg_color="#0B3D2E", corner_radius=6)
+        frame_lcd.pack(side="left", padx=(5, 12), pady=8, fill="x", expand=True)
+        self.lbl_lcd1 = ctk.CTkLabel(frame_lcd, text="", font=("Consolas", 14, "bold"), text_color="#B9F6CA", anchor="w")
+        self.lbl_lcd1.pack(fill="x", padx=10, pady=(8, 0))
+        self.lbl_lcd2 = ctk.CTkLabel(frame_lcd, text="", font=("Consolas", 14, "bold"), text_color="#B9F6CA", anchor="w")
+        self.lbl_lcd2.pack(fill="x", padx=10, pady=(0, 8))
+        self._refrescar_porteria()
+
         # Consola interactiva para logs y auditoría inmediata
         ctk.CTkLabel(
             frame_right,
@@ -527,6 +551,24 @@ class AppAccesoVehicularFinal(ctk.CTk):
             fg_color="#121212"
         )
         self.txt_log.pack(padx=20, pady=(5, 20), fill="x")
+
+    def _refrescar_porteria(self):
+        """Dibuja la pluma (cerrada = barra horizontal; abierta = barra levantada) y el texto de la pantalla."""
+        p = self.porteria
+        p.revisar_tiempo()
+        c = self.canvas_pluma
+        c.delete("all")
+        abierta = p.pluma_abierta
+        c.create_rectangle(12, 30, 30, 76, fill="#555555", outline="")             # poste
+        if abierta:
+            c.create_line(21, 34, 21, 4, width=7, fill="#2ECC71", capstyle="round")   # brazo levantado
+        else:
+            c.create_line(21, 34, 190, 34, width=7, fill="#E74C3C", capstyle="round")  # brazo cruzando el carril
+        c.create_text(120, 66, text="PLUMA ABIERTA" if abierta else "PLUMA CERRADA",
+                      fill="#2ECC71" if abierta else "#E74C3C", font=("Arial", 10, "bold"))
+        self.lbl_lcd1.configure(text=p.linea1.ljust(16))
+        self.lbl_lcd2.configure(text=p.linea2.ljust(16))
+        self.after(200, self._refrescar_porteria)
 
     def update_video_ui(self):
         """Bucle periódico (20ms) para renderizar el último fotograma en la interfaz."""
@@ -593,6 +635,7 @@ class AppAccesoVehicularFinal(ctk.CTk):
         idx = self.video_worker.cam_index
         texto = f"Cámara Índice {idx} Activa" if idx is not None else "Sistema OK"
         self.set_estado(texto, "#2D2D2D", "#E0E0E0")
+        self.porteria.reposo()
 
     # -----------------------------------------------------------------
     # RECONOCIMIENTO FACIAL (OPTIMIZADO CON ENCODINGS PRE-CALCULADOS)
@@ -609,7 +652,8 @@ class AppAccesoVehicularFinal(ctk.CTk):
         modo = self.combo_modo.get()
         ahora_s = time.time()
         if self.intentos.bloqueado(ahora_s):
-            self._denegar(f"Lector bloqueado por intentos fallidos. Espere {self.intentos.segundos_restantes(ahora_s)} s")
+            self._denegar(f"Lector bloqueado por intentos fallidos. Espere {self.intentos.segundos_restantes(ahora_s)} s",
+                          "Lector bloqueado")
             return
         self.log(f"Sensor activado ({modo}). Analizando rostro...")
 
@@ -669,6 +713,13 @@ class AppAccesoVehicularFinal(ctk.CTk):
         # viven en nucleo.py y están cubiertas por pruebas automáticas.
         cn = nucleo.conectar(DB_FILE)
         decision = nucleo.evaluar_acceso(cn, uid, modo)
+        placa_leida = self.entry_placa.get().strip()
+        if placa_leida and decision.resultado == nucleo.AUTORIZADO and not nucleo.placas_coinciden(placa_leida, placa):
+            # El rostro es de la persona, pero el vehículo no es el registrado: lo decide el guarda.
+            decision = nucleo.Decision(
+                nucleo.REVISAR,
+                f"La placa leída ({placa_leida.upper()}) no coincide con la registrada ({placa or 'sin placa'}).",
+                decision.categoria)
         if decision.resultado == nucleo.REVISAR:
             # Caso dudoso: el sistema nunca lo decide solo; lo decide el guarda.
             permitir = messagebox.askyesno(
@@ -688,7 +739,7 @@ class AppAccesoVehicularFinal(ctk.CTk):
 
         if decision.resultado != nucleo.AUTORIZADO:
             self.actualizar_tabla_estado()
-            self._denegar(decision.motivo)
+            self._denegar(decision.motivo, nombre)
             return
 
         # Emitir notificaciones visuales, acústicas e interfaz emergente
@@ -703,8 +754,8 @@ class AppAccesoVehicularFinal(ctk.CTk):
             f"Placa: {placa} | Puesto: {puesto} | Categoría: {decision.categoria} | "
             f"Visitantes libres: {libres}/{cupo}"
         )
-        if self.puente is not None:
-            self.puente.abrir()                    # pide al Arduino que abra la pluma
+        self.porteria.abrir(nombre)                # sube la pluma virtual y, si hay Arduino, la física
+        self.log("Pluma abierta 3 s")
         play_sound(True)
         self.mostrar_popup_bienvenida(nombre_completo, puesto, modo)
         self.actualizar_tabla_estado()
@@ -717,8 +768,9 @@ class AppAccesoVehicularFinal(ctk.CTk):
             motivo += f" · lector bloqueado {nucleo.SEGUNDOS_BLOQUEO} s"
         self._denegar(motivo)
 
-    def _denegar(self, motivo):
+    def _denegar(self, motivo, linea_lcd=""):
         """Maneja el rechazo de acceso actualizando la interfaz y emitiendo tonos de alerta."""
+        self.porteria.denegar(linea_lcd or motivo)
         self.set_estado("ACCESO DENEGADO", "#78281F", "#E74C3C")
         self.log(f"🚫 {motivo}")
         play_sound(False)

@@ -60,7 +60,7 @@ section{padding-block:56px;scroll-margin-top:60px}
 .ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.bad{background:var(--badbg);color:var(--bad)}.neu{background:var(--soft);color:var(--acc)}
 table{border-collapse:collapse;width:100%;font-size:.95rem}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}th{font-weight:600;color:var(--mute);font-size:.82rem;text-transform:uppercase;letter-spacing:.06em}
 .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-code{white-space:nowrap;font-family:var(--f-m);font-size:.86em;background:var(--soft);padding:1px 6px;border-radius:5px}
+p code{white-space:normal}code{white-space:nowrap;font-family:var(--f-m);font-size:.86em;background:var(--soft);padding:1px 6px;border-radius:5px}
 pre{font:500 .85rem var(--f-m);background:var(--night);color:#d7e3f4;border-radius:12px;padding:16px;overflow-x:auto;margin:12px 0}
 details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px}summary{cursor:pointer;font-weight:600}
 details[open] summary{margin-bottom:8px}
@@ -94,6 +94,24 @@ details[open] summary{margin-bottom:8px}
 .toast{position:fixed;bottom:max(16px,env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--night);color:#fff;padding:10px 16px;border-radius:10px;font-size:.9rem;z-index:40;max-width:90vw;box-shadow:var(--sh)}
 footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px solid var(--line)}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* panel de la aplicación */
+.login{max-width:340px;margin:16px auto;text-align:left}
+.inp{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem;margin:4px 0 10px}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;padding:9px 12px;font:600 .9rem var(--f-b);color:var(--mute);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected=true]{color:var(--acc);border-color:var(--acc)}
+.tabs .sp{margin-left:auto}
+.bar{height:6px;background:var(--line);border-radius:4px;margin-top:6px;width:84px;overflow:hidden}.bar i{display:block;height:100%;border-radius:4px}
+.frm{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;align-items:end}
+.frm label{font-size:.8rem;color:var(--mute);display:block}.frm .inp{margin:3px 0 0}
+.pqg{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px;margin:8px 0 14px}
+.pq{border:1px solid var(--line);border-radius:8px;padding:6px 2px;text-align:center;font:600 .72rem var(--f-m);background:var(--okbg);color:var(--ok)}
+.pq.o{background:var(--badbg);color:var(--bad)}.pq small{display:block;font:400 .66rem var(--f-b);opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.camg{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px}@media(max-width:800px){.camg{grid-template-columns:1fr}}
+.camg canvas{width:100%;height:auto;border-radius:10px;background:#05080d;display:block}
+.thumbs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.thumbs button{padding:0;border:2px solid transparent;border-radius:10px;background:none;cursor:pointer}.thumbs button[aria-pressed=true]{border-color:var(--acc)}
+#mapa.cctv{filter:grayscale(.85) contrast(1.15)}
+.utab td .btn{margin:0 4px 4px 0}
 </style>
 
 <header class="top"><div class="w">
@@ -108,14 +126,14 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
   <h1>Cada entrada y salida del parqueadero, registrada y bajo las mismas reglas.</h1>
   <p class="lead">CISPPH ayuda al guarda de un conjunto residencial a decidir quién entra y quién sale, y deja un historial de todo lo que pasa. Aquí puede ver cómo funciona y probarlo.</p>
   <div class="row"><a class="btn p" href="#simulador">Probar el simulador</a><a class="btn" href="#como">Ver cómo funciona</a><a class="btn" href="https://github.com/SrMrLDavid/cispph">Código en GitHub</a></div>
-  <div class="chips"><span class="chip">Cliente ficticio: Robles del Norte P.H.</span><span class="chip">Simulador + sistema en Python + prototipo Arduino</span><span class="chip">Documentos en APA 7</span></div>
+  <div class="chips"><span class="chip">Cliente: Robles del Norte P.H.</span><span class="chip">Simulador + sistema en Python + prototipo Arduino</span><span class="chip">Documentos en APA 7</span></div>
 </section>
 
 <section id="problema">
   <div class="eyebrow">El problema</div>
   <h2>Hoy, mucho de este control se hace a mano.</h2>
   <p>En muchos conjuntos el guarda mira la placa, pregunta por el visitante y anota todo en un cuaderno. Eso genera filas, errores al escribir y poca claridad: después nadie sabe con certeza quién entró, a qué hora y quién lo autorizó.</p>
-  <p class="mute small">Es una hipótesis de trabajo del equipo. No hubo observación en un conjunto real, porque el caso es ficticio.</p>
+  <p class="mute small">Es la situación de partida del proyecto; el equipo la confirmará con la administración del conjunto.</p>
 </section>
 
 <section id="como" class="band"><div class="w">
@@ -143,33 +161,119 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
 <section id="simulador">
   <div class="eyebrow">Simulador</div>
   <h2>Sea el guarda por unos minutos.</h2>
-  <p>Es la versión ligera del simulador 3D hecho en Godot. Tiene las mismas reglas: llegan vehículos, usted revisa las pruebas y decide. Los casos dudosos nunca se deciden solos.</p>
+  <p>Llegan vehículos a la garita, usted revisa las pruebas y decide. Los casos dudosos nunca se deciden solos. Para entrar use el usuario <code>admin</code> y la clave <code>admin123</code>.</p>
   <div class="simbox" id="sim">
-    <div class="hud" id="hud"></div>
-    <div class="simgrid">
-      <div>
-        <canvas id="mapa" width="760" height="330" role="img" aria-label="Mapa del parqueadero con garita, barreras y 40 puestos"></canvas>
-        <div class="ctl">
-          <button class="btn p s" id="bEnt">Generar entrada</button>
-          <button class="btn s" id="bSal">Generar salida</button>
-          <span class="seg" role="group" aria-label="Modo de decisión"><button id="mMan" aria-pressed="false">Manual</button><button id="mAut" aria-pressed="true">Automático</button></span>
-          <span class="seg" role="group" aria-label="Velocidad"><button id="v1" aria-pressed="true">×1</button><button id="v2" aria-pressed="false">×2</button></span>
+    <div id="login" class="login">
+      <h3>Ingreso al sistema</h3>
+      <label for="lUser" class="small mute">Usuario</label><input class="inp" id="lUser" autocomplete="off" value="admin">
+      <label for="lPass" class="small mute">Clave</label><input class="inp" id="lPass" type="password" autocomplete="off">
+      <div class="row"><button class="btn p" id="bLogin">Ingresar</button><span class="small mute" id="lMsg" role="status"></span></div>
+      <p class="mute small" style="margin-top:12px">Tras tres intentos fallidos el acceso se bloquea unos segundos.</p>
+    </div>
+    <div id="app" hidden>
+      <div class="tabs" role="tablist" aria-label="Secciones del simulador">
+        <button role="tab" data-t="op" aria-selected="true">Operación</button><button role="tab" data-t="us" aria-selected="false">Usuarios</button><button role="tab" data-t="pq" aria-selected="false">Parqueadero</button><button role="tab" data-t="hi" aria-selected="false">Historial</button><button role="tab" data-t="ca" aria-selected="false">Cámaras</button><button role="tab" data-t="aj" aria-selected="false">Ajustes</button>
+        <button class="btn s sp" id="bQue">¿Qué es CISPPH?</button>
+      </div>
+      <div id="que" class="card" hidden style="box-shadow:none;margin-bottom:12px"><b>CISPPH</b> controla quién entra y quién sale de un parqueadero de propiedad horizontal. Compara la placa, el rostro y el vehículo con lo registrado: si todo coincide, autoriza; si algo no cuadra, pide al guarda que decida; y todo queda en el historial.</div>
+      <div class="hud" id="hud"></div>
+
+      <div id="t-op">
+        <div class="simgrid">
+          <div>
+            <canvas id="mapa" width="760" height="330" role="img" aria-label="Mapa del parqueadero con garita, barreras de entrada y salida y 40 puestos"></canvas>
+            <div class="ctl">
+              <button class="btn p s" id="bEnt">Generar entrada</button>
+              <button class="btn s" id="bSal">Generar salida</button>
+              <span class="seg" role="group" aria-label="Modo de decisión"><button id="mMan" aria-pressed="false">Manual</button><button id="mAut" aria-pressed="true">Automático</button></span>
+              <span class="seg" role="group" aria-label="Velocidad"><button id="v1" aria-pressed="true">×1</button><button id="v2" aria-pressed="false">×2</button></span>
+            </div>
+            <div class="ctl">
+              <label><input type="checkbox" id="cLleg"> Llegadas automáticas</label>
+              <label><input type="checkbox" id="cErr"> Error de conexión (7 %)</label>
+              <button class="btn s" id="bApag">Provocar apagón</button>
+              <button class="btn s" id="bReset">Reiniciar</button>
+            </div>
+          </div>
+          <div class="panel" id="panel"><div class="vacio">Pulse <b>Generar entrada</b> para que llegue el primer vehículo.</div></div>
         </div>
-        <div class="ctl">
-          <label><input type="checkbox" id="cLleg"> Llegadas automáticas</label>
-          <label><input type="checkbox" id="cErr"> Error de conexión (7 %)</label>
-          <button class="btn s" id="bApag">Provocar apagón</button>
-          <button class="btn s" id="bReset">Reiniciar</button>
+        <div class="row" style="justify-content:space-between;margin-top:14px"><h3 style="margin:0">Últimos movimientos</h3><span class="row"><button class="btn s" id="bMet">Ver métricas</button><button class="btn s" id="bCopy">Copiar historial</button></span></div>
+        <div class="hist scroll" style="margin-top:8px" id="hist"></div>
+        <div id="metr" hidden class="card" style="margin-top:10px;box-shadow:none"></div>
+      </div>
+
+      <div id="t-us" hidden>
+        <h3>Usuarios registrados</h3>
+        <div class="scroll hist" style="max-height:340px;margin-top:8px"><div id="usTab"></div></div>
+        <h3 style="margin-top:18px">Registrar usuario</h3>
+        <div class="frm">
+          <div><label for="uRol">Rol</label><select class="inp" id="uRol"><option value="residente">Residente</option><option value="trabajador">Trabajador</option><option value="visitante">Visitante</option></select></div>
+          <div><label for="uNom">Nombre</label><input class="inp" id="uNom" maxlength="24"></div>
+          <div><label for="uApe">Apellido</label><input class="inp" id="uApe" maxlength="24"></div>
+          <div><label for="uApto">Apartamento</label><input class="inp" id="uApto" maxlength="8" placeholder="A-101"></div>
+          <div><label for="uPla">Placa</label><input class="inp" id="uPla" maxlength="7" placeholder="ABC-123"></div>
+          <div><label for="uTip">Tipo</label><select class="inp" id="uTip"></select></div>
+          <div><label for="uCol">Color</label><select class="inp" id="uCol"></select></div>
+          <div><label for="uTur">Turno (trabajador)</label><select class="inp" id="uTur"><option value="mañana">Mañana 6–14</option><option value="tarde">Tarde 14–22</option></select></div>
+          <div><button class="btn p" id="bAddU">Registrar</button></div>
+        </div>
+        <h3 style="margin-top:18px">Vehículo adicional</h3>
+        <div class="frm">
+          <div><label for="aUsr">Usuario</label><select class="inp" id="aUsr"></select></div>
+          <div><label for="aPla">Placa</label><input class="inp" id="aPla" maxlength="7" placeholder="XYZ-123"></div>
+          <div><label for="aTip">Tipo</label><select class="inp" id="aTip"></select></div>
+          <div><label for="aCol">Color</label><select class="inp" id="aCol"></select></div>
+          <div><button class="btn" id="bAddV">Agregar vehículo</button></div>
+        </div>
+        <h3 style="margin-top:18px">Categoría VIP</h3>
+        <div class="frm">
+          <div><label for="vUsr">Usuario</label><select class="inp" id="vUsr"></select></div>
+          <div style="grid-column:span 2"><label for="vMot">Motivo (obligatorio)</label><input class="inp" id="vMot" maxlength="60" placeholder="Por qué se cambia la categoría"></div>
+          <div><button class="btn" id="bVipOn">Marcar VIP</button> <button class="btn" id="bVipOff">Quitar VIP</button></div>
         </div>
       </div>
-      <div class="panel" id="panel"><div class="vacio">Pulse <b>Generar entrada</b> para que llegue el primer vehículo.</div></div>
+
+      <div id="t-pq" hidden>
+        <h3>Residentes <span class="mute small" id="pqR"></span></h3><div class="pqg" id="gR"></div>
+        <h3>Visitantes <span class="mute small" id="pqV"></span></h3><div class="pqg" id="gV"></div>
+      </div>
+
+      <div id="t-hi" hidden>
+        <div class="frm" style="margin-bottom:10px">
+          <div><label for="fSen">Sentido</label><select class="inp" id="fSen"><option value="">Todos</option><option>Entrada</option><option>Salida</option></select></div>
+          <div><label for="fDec">Decisión</label><select class="inp" id="fDec"><option value="">Todas</option><option value="permitido">Permitido</option><option value="denegado">Denegado</option></select></div>
+          <div><label for="fTxt">Placa o persona</label><input class="inp" id="fTxt" maxlength="20"></div>
+          <div><button class="btn s" id="bCopy2">Copiar historial</button></div>
+        </div>
+        <div class="hist scroll" id="hist2" style="max-height:420px"></div>
+      </div>
+
+      <div id="t-ca" hidden>
+        <div class="camg">
+          <div><canvas id="camG" width="560" height="315" role="img" aria-label="Vista de la cámara seleccionada"></canvas>
+            <div class="ctl"><span class="small mute" id="camN"></span>
+              <button class="btn s" data-pan="-1,0" aria-label="Girar a la izquierda">◀</button><button class="btn s" data-pan="0,-1" aria-label="Inclinar hacia arriba">▲</button><button class="btn s" data-pan="0,1" aria-label="Inclinar hacia abajo">▼</button><button class="btn s" data-pan="1,0" aria-label="Girar a la derecha">▶</button></div></div>
+          <div class="thumbs" id="thumbs"></div>
+        </div>
+      </div>
+
+      <div id="t-aj" hidden>
+        <div class="grid" style="margin-top:0">
+          <div class="card" style="box-shadow:none"><h3>Operación</h3>
+            <label class="small mute" for="rSeg">Segundos para ejecutar en modo automático: <b id="rSegV">3</b></label><input type="range" id="rSeg" min="2" max="8" value="3" style="width:100%">
+            <div class="ctl"><label><input type="checkbox" id="cApR"> Apagón aleatorio</label></div>
+            <div class="ctl"><label><input type="checkbox" id="cCctv"> Filtro de cámara de seguridad</label></div>
+            <div class="ctl"><label><input type="checkbox" id="cExp"> Cerrar sesión tras 2 min sin actividad</label></div>
+          </div>
+          <div class="card" style="box-shadow:none"><h3>Cambiar clave</h3>
+            <label class="small mute" for="pOld">Clave actual</label><input class="inp" id="pOld" type="password" autocomplete="off">
+            <label class="small mute" for="pNew">Clave nueva (mínimo 6 caracteres)</label><input class="inp" id="pNew" type="password" autocomplete="off">
+            <div class="row"><button class="btn" id="bPass">Cambiar clave</button><button class="btn r" id="bOut">Cerrar sesión</button></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="row" style="justify-content:space-between;margin-top:14px"><h3 style="margin:0">Historial</h3><span class="row"><button class="btn s" id="bMet">Ver métricas</button><button class="btn s" id="bCopy">Copiar historial</button></span></div>
-    <div class="hist scroll" style="margin-top:8px" id="hist"></div>
-    <div id="metr" hidden class="card" style="margin-top:10px;box-shadow:none"></div>
   </div>
-  <details style="margin-top:16px"><summary>Qué es real y qué es simulado</summary>
-    <p class="mute">La lectura de placa es el texto de la placa; el rostro se compara con números (misma persona: distancia baja; otra persona: alta; tolerancia 0,55). Los nombres, documentos y respuestas del citófono los inventa el generador de casos. El dinero y los aciertos son un juego para practicar decisiones: no son reglas del proyecto. En la versión de Godot hay 3D, personas caminando, cámaras de seguridad y cinemáticas; aquí no.</p></details>
 </section>
 
 <section id="sistemas" class="band"><div class="w">
@@ -184,7 +288,7 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
   <h3 style="margin-top:30px">Tres piezas, una misma lógica</h3>
   <div class="grid">
     <div class="card"><span class="pill neu">Godot</span><h3 style="margin-top:8px">Simulador 3D</h3><p class="mute">Muestra todo el flujo sin hardware, con 40 puestos, casos de robo y apagones. Las reglas pasan sus pruebas automáticas.</p></div>
-    <div class="card"><span class="pill neu">Python</span><h3 style="margin-top:8px">Sistema con cámara y rostros</h3><p class="mute">Programa de escritorio con base de datos SQLite. Las reglas y el puente con Arduino tienen 22 pruebas que pasan. La ventana, la cámara y el reconocimiento facial no se han probado.</p></div>
+    <div class="card"><span class="pill neu">Python</span><h3 style="margin-top:8px">Sistema con cámara y rostros</h3><p class="mute">Programa de escritorio con base de datos SQLite. Las reglas y el puente con Arduino tienen 30 pruebas que pasan. La ventana, la cámara y el reconocimiento facial no se han probado.</p></div>
     <div class="card"><span class="pill neu">Arduino</span><h3 style="margin-top:8px">Pluma y lector de tarjetas</h3><p class="mute">Reglas en C++ con 23 pruebas que pasan en un PC. No se ha cargado en una placa real.</p></div>
   </div>
   <h3 style="margin-top:30px">Librerías</h3>
@@ -237,7 +341,7 @@ python -m unittest discover -s pruebas</pre>
 </section>
 </main>
 
-<footer><div class="w">Proyecto académico con cliente ficticio. Versión del 26/10/2026. Lo que no se ha probado está marcado como tal en cada sección.</div></footer>
+<footer><div class="w">Proyecto de Diseño de Software I · ETITC. Versión del 27/10/2026. Lo que no se ha probado está marcado como tal en cada sección.</div></footer>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -259,7 +363,7 @@ $('docs').innerHTML=DOCS.map(([g,l],i)=>'<details'+(i===0?' open':'')+'><summary
   l.map(([n,f])=>'<a class="card" style="box-shadow:none;text-decoration:none;color:inherit;padding:12px 14px" href="'+GH+encodeURIComponent(f)+'"><b style="font-size:.95rem">'+n+'</b><br><span class="mute small">'+f.split('.').pop().toUpperCase()+' · ver en GitHub</span></a>').join('')+'</div></details>').join('');
 
 /* ====================================================================
-   SIMULADOR LIGERO — mismas reglas que Sistema.evaluar_acceso de Godot
+   SIMULADOR — reglas de acceso del sistema CISPPH
    ==================================================================== */
 const TOL=0.55, N_R=25, N_V=15;
 const TIPOS={sedan:'sedán',suv:'camioneta SUV',hatchback:'hatchback',pickup:'camioneta pick-up',moto:'moto'};
@@ -284,7 +388,7 @@ function descVeh(v){return TIPOS[v.tipo]+' '+COLORES[v.color]}
 function nombre(u){return u.nombre+' '+u.apellido}
 function nuevoEstado(){
   const E={usuarios:[],dentro:{},ocup:{},mov:[],hora:17.5,dinero:0,aciertos:0,dudosos:0,fallos:0,caso:null,
-    modo:'auto',vel:1,apagon:0,sigId:1,tAuto:0,carros:[],tiemposG:[],nAuto:0,nGuardia:0,usoInsp:0};
+    modo:'auto',vel:1,apagon:0,estres:0,segAuto:+(($('rSeg')||{}).value||3),ped:[],banner:null,camFalla:0,sigId:1,tAuto:0,carros:[],tiemposG:[],nAuto:0,nGuardia:0,usoInsp:0};
   E.pR=[];E.pV=[];for(let i=1;i<=N_R;i++)E.pR.push('R-'+String(i).padStart(2,'0'));for(let i=1;i<=N_V;i++)E.pV.push('V-'+String(i).padStart(2,'0'));
   [...E.pR,...E.pV].forEach(p=>E.ocup[p]=0);
   BASE.forEach(b=>{const id=E.sigId++;E.usuarios.push({id,rol:b[0],nombre:b[1],apellido:b[2],parq:b[3],apto:b[5],turno:b[6],autPor:b[7],rostro:1000+id*37,
@@ -312,6 +416,7 @@ function evaluar(c){
   const u=buscarPlaca(c.pDel);r.usuario=u;
   if(c.pDel!==c.pTra){r.res='revisar';r.motivo='Las placas delantera y trasera no coinciden.';return r}
   if(!u){r.res='revisar';r.motivo='Placa no registrada: vehículo desconocido.';return r}
+  if(!u.activo){r.motivo=nombre(u)+' está desactivado en el sistema.';return r}
   const d=dist(u.rostro,c.rostro);r.d=d;
   if(d>TOL){r.res='revisar';r.motivo='El rostro del conductor no coincide con el titular de la placa (distancia '+d.toFixed(2)+' > '+TOL.toFixed(2)+').';return r}
   const reg=vehReg(u,c.pDel);
@@ -392,7 +497,7 @@ function ejecutar(c,permitir,por,nota){
   }else{
     registrar(c,'denegado',det+(por==='Automático'?'':' · Denegado por el guarda.'),por,nota,'');
     c.car.estado=c.sentido==='Entrada'?'retira':'vuelve';
-    if(c.sentido==='Salida'&&!c.legit&&por!=='Automático'){toast('Policía: se llevan a la persona detenida. El vehículo vuelve a su puesto.')}}
+}
   if(por!=='Automático'){S.nGuardia++;S.tiemposG.push((performance.now()-c.t0)/1000)}else S.nAuto++;
   puntuar(c,permitir,por);S.caso=null;S.pend=null;barreraAbre(c,permitir);render();return true}
 function puntuar(c,permitir,por){
@@ -401,7 +506,10 @@ function puntuar(c,permitir,por){
   let ok,msg;
   if(c.legit){ok=permitir;S.dinero+=ok?1000:-10000;msg=ok?'Acertó: era legítimo.':'Era legítimo y lo negó (−$10.000).'}
   else{ok=!permitir;S.dinero+=ok?(c.sentido==='Salida'?20000:1000):-50000;msg=ok?'Acertó: no era legítimo.':'No era legítimo y lo dejó pasar (−$50.000).'}
-  if(ok)S.aciertos++;else S.fallos++;toast(msg+' (valores de juego)')}
+  if(!c.legit&&c.sentido==='Salida')S.banner={t:4,txt:permitir?'El dueño llama: le robaron el vehículo.':'Llega la policía y se lleva al detenido.',bad:permitir};
+  else if(!c.legit&&permitir)S.banner={t:4,txt:'Un intruso entró al conjunto.',bad:true};
+  S.estres=Math.max(0,Math.min(100,S.estres+(ok?-8:15)));
+  if(ok)S.aciertos++;else S.fallos++;toast(msg)}
 let barrera={ent:0,sal:0};
 function barreraAbre(c,perm){if(!perm)return;if(c.sentido==='Entrada')barrera.ent=1;else barrera.sal=1}
 
@@ -431,7 +539,7 @@ function panel(){
     h+='</div><input class="note" id="nota" placeholder="Nota opcional para el historial" maxlength="80">';
   }else{
     const ok=ev.res==='autorizado';
-    if(S.modo==='auto')h+='<span class="small mute">Modo automático: se ejecuta en '+Math.ceil(S.tAuto>0?S.tAuto:3)+' s.</span>';
+    if(S.modo==='auto')h+='<span class="small mute">Modo automático: se ejecuta en '+Math.ceil(S.tAuto>0?S.tAuto:S.segAuto)+' s.</span>';
     h+='<button class="btn '+(ok?'g':'r')+' s" id="bYa" '+(!llegada?'disabled':'')+'>'+(ok?'Permitir ahora':'Confirmar denegado')+'</button></div>';
   }
   const nv=$('nota'),nval=nv?nv.value:'',nfoc=nv&&document.activeElement===nv;
@@ -475,15 +583,22 @@ function cara(x,seed){x.clearRect(0,0,56,56);const r=n=>((seed*n*2654435761)>>>0
   x.fillStyle=pelo;x.fillRect(13,14,30,8+r(11)*6);x.fillStyle='#222';const e=6+r(5)*4;x.beginPath();x.arc(28-e,28,1.8,0,7);x.arc(28+e,28,1.8,0,7);x.fill();
   x.strokeStyle='#7a3b2e';x.lineWidth=1.6;x.beginPath();x.arc(28,38,5+r(13)*3,0.15*Math.PI,0.85*Math.PI);x.stroke()}
 
-/* ----- HUD, historial, métricas ----- */
+/* ----- hud, historial, métricas (reemplazan a las versiones simples) ----- */
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 function hud(){const dentro=Object.keys(S.dentro).length,lR=S.pR.filter(p=>!S.ocup[p]).length,lV=S.pV.filter(p=>!S.ocup[p]).length;
-  const k=(t,v)=>'<div class="kpi">'+t+'<b>'+v+'</b></div>';
-  $('hud').innerHTML=k('Hora simulada',horaTxt())+k('Dentro',dentro)+k('Residentes libres',lR+'/'+N_R)+k('Visitantes libres',lV+'/'+N_V)+k('Aciertos',S.aciertos+'/'+S.dudosos)+k('Dinero (juego)','$'+S.dinero.toLocaleString('es-CO'))}
-function histo(){if(!S.mov.length){$('hist').innerHTML='<div class="vacio" style="padding:20px">Aún no hay movimientos.</div>';return}
-  $('hist').innerHTML='<table><tr><th>Hora</th><th>Sentido</th><th>Placa</th><th>Persona</th><th>Cat.</th><th>Decisión</th><th>Por</th><th>Detalle</th></tr>'+S.mov.slice(0,30).map(m=>'<tr><td>'+m.hora+'</td><td>'+m.sent+'</td><td><code>'+m.placa+'</code></td><td>'+m.quien+'</td><td>'+m.cat+'</td><td><span class="pill '+(m.dec==='permitido'?'ok':'bad')+'">'+m.dec+'</span></td><td>'+m.por+'</td><td>'+m.det+(m.nota?' · Nota: '+m.nota:'')+'</td></tr>').join('')+'</table>'}
+  const k=(t,v)=>'<div class="kpi">'+t+'<b>'+v+'</b></div>',e=Math.round(S.estres);
+  $('hud').innerHTML=k('Hora',horaTxt())+k('Dentro',dentro)+k('Residentes libres',lR+'/'+N_R)+k('Visitantes libres',lV+'/'+N_V)+k('Aciertos',S.aciertos+'/'+S.dudosos)+k('Balance del turno','$'+S.dinero.toLocaleString('es-CO'))+
+   '<div class="kpi">Estrés<div class="bar" role="img" aria-label="Estrés '+e+' por ciento"><i style="width:'+e+'%;background:'+(e>70?'var(--bad)':e>40?'var(--warn)':'var(--acc2)')+'"></i></div></div>'}
+function tablaMov(l,n){if(!l.length)return'<div class="vacio" style="padding:20px">No hay movimientos para mostrar.</div>';
+  return'<table><tr><th>Hora</th><th>Sentido</th><th>Placa</th><th>Persona</th><th>Cat.</th><th>Decisión</th><th>Por</th><th>Detalle</th></tr>'+l.slice(0,n).map(m=>'<tr><td>'+m.hora+'</td><td>'+m.sent+'</td><td><code>'+m.placa+'</code></td><td>'+m.quien+'</td><td>'+m.cat+'</td><td><span class="pill '+(m.dec==='permitido'?'ok':'bad')+'">'+m.dec+'</span></td><td>'+m.por+'</td><td>'+m.det+(m.nota?' · Nota: '+esc(m.nota):'')+'</td></tr>').join('')+'</table>'}
+function filtrarMov(){const s=$('fSen').value,d=$('fDec').value,t=$('fTxt').value.trim().toLowerCase();
+  return S.mov.filter(m=>(!s||m.sent===s)&&(!d||m.dec===d)&&(!t||(m.placa+' '+m.quien).toLowerCase().includes(t)))}
+function histo(){$('hist').innerHTML=tablaMov(S.mov,8)}
+function csv(){return'hora,sentido,placa,persona,categoria,decision,por,detalle,nota\n'+S.mov.map(m=>[m.hora,m.sent,m.placa,m.quien,m.cat,m.dec,m.por,'"'+m.det+'"','"'+m.nota.replace(/"/g,"'")+'"'].join(',')).join('\n')}
+function copiar(){try{navigator.clipboard.writeText(csv()).then(()=>toast('Historial copiado.'),()=>toast('No se pudo copiar en este navegador.'))}catch(e){toast('No se pudo copiar en este navegador.')}}
 function metricas(){const t=S.tiemposG,n=t.length,pr=n?(t.reduce((a,b)=>a+b,0)/n).toFixed(1):'—';
   $('metr').innerHTML='<b>Métricas de esta sesión</b><p class="small mute" style="margin:6px 0 0">Decisiones del guarda: <b>'+S.nGuardia+'</b> · automáticas: <b>'+S.nAuto+'</b> · tiempo de decisión del guarda (promedio / mín. / máx.): <b>'+pr+' s'+(n?' / '+Math.min(...t).toFixed(1)+' s / '+Math.max(...t).toFixed(1)+' s':'')+'</b> · consultas al citófono o «preguntar»: <b>'+S.usoInsp+'</b> · aciertos en casos dudosos: <b>'+S.aciertos+' de '+S.dudosos+'</b>.<br>Este tiempo incluye el tiempo de pensar de la persona: no mide el requisito de rendimiento (RNF-003).</p>'}
-function render(){hud();panel();histo();if(!$('metr').hidden)metricas();draw()}
+function render(){hud();panel();histo();if(!$('metr').hidden)metricas();extra();draw()}
 
 /* ----- mapa: geometría ----- */
 const SW=34,SH=38;
@@ -533,40 +648,130 @@ function draw(){
     const u=uid(id);if(!u)continue;const v=u.vehs.find(v=>v.placa===S.carroDe[id])||u.vehs[0];
     coche(PX[p],PY[p],PY[p]===49?-Math.PI/2:Math.PI/2,v.color,v.tipo)}
   // garita y barreras
-  cx.fillStyle='#e6b94a';cx.fillRect(122,198,34,22);cx.fillStyle='#16202c';cx.font='700 8px Sora,sans-serif';cx.fillText('GARITA',139,212);
-  barr(150,190,barrera.ent);barr(150,230,barrera.sal);
+  cx.fillStyle='#e6b94a';cx.fillRect(158,200,36,20);cx.fillStyle='#16202c';cx.font='700 7px Sora,sans-serif';cx.textAlign='center';cx.fillText('GARITA',176,212);
+  cx.fillStyle='#2a6df4';cx.beginPath();cx.arc(168,206,2.6,0,7);cx.fill();
+  barr(150,201,barrera.ent,-1);barr(150,219,barrera.sal,1);
+  for(const p of S.ped){const b=Math.sin(p.x*.35)*1.2;cx.fillStyle=p.c;cx.beginPath();cx.arc(p.x,p.y-6+b,2.8,0,7);cx.fill();cx.fillRect(p.x-2,p.y-3+b,4,6);}
   cx.fillStyle=css('--mute');cx.font='500 9px Public Sans,sans-serif';cx.textAlign='left';cx.fillText('ENTRADA →',6,184);cx.fillText('← SALIDA',6,247);
   cx.textAlign='left';cx.fillStyle=css('--mute');cx.fillText('Residentes R-01 a R-25',232,24);cx.fillText('Visitantes V-01 a V-15',232,248);
   for(const c of S.carros){coche(c.x,c.y,c.ang,c.col,c.tipo,c.rev)}
+  if(S.banner&&S.banner.t>0){const t=S.banner.txt;cx.font='700 13px Sora,sans-serif';const w=cx.measureText(t).width+28;cx.textAlign='center';cx.fillStyle=S.banner.bad?'rgba(180,35,44,.92)':'rgba(11,122,82,.92)';rr(380-w/2,288,w,30,8);cx.fill();cx.fillStyle='#fff';cx.fillText(t,380,308)}
   if(noche){cx.fillStyle='rgba(4,10,24,.55)';cx.fillRect(0,0,760,330);cx.fillStyle='#ff8a8a';cx.font='700 14px Sora,sans-serif';cx.fillText('SISTEMA CAÍDO',590,26)}}
-function barr(x,y,a){cx.save();cx.translate(x,y);cx.fillStyle='#16202c';cx.fillRect(-4,-4,8,8);cx.rotate(-a*Math.PI/2.2);cx.fillStyle=a>.5?'#2fbf71':'#ff5d5d';cx.fillRect(0,-2.5,34,5);cx.restore()}
+function barr(x,y,a,d){/* a: 0 cerrada (cruza el carril), 1 abierta (queda a lo largo de la vía); d: -1 el brazo cerrado apunta hacia arriba, 1 hacia abajo */
+  cx.save();cx.translate(x,y);cx.fillStyle='#16202c';cx.fillRect(-5,-5,10,10);
+  cx.rotate(d*(Math.PI/2+a*Math.PI/2));
+  for(let k=0;k<6;k++){cx.fillStyle=k%2?'#ffffff':'#e5483f';cx.fillRect(5*k,-2.5,5,5)}
+  cx.restore();cx.fillStyle=a>.5?'#2fbf71':'#ff5d5d';cx.beginPath();cx.arc(x,y,2.4,0,7);cx.fill()}
 
 /* ----- bucle ----- */
 let last=performance.now(),cuenta=0;
 function tick(now){const dt=Math.min(.1,(now-last)/1000);last=now;
-  if(S){S.hora+=dt*S.vel/60;
-    barrera.ent+=((S.carros.some(c=>c.estado==='entra'&&c.x<190&&c.c.sentido==='Entrada')?1:0)-barrera.ent)*Math.min(1,dt*6);
-    barrera.sal+=((S.carros.some(c=>c.estado==='sale'&&c.x<190)?1:0)-barrera.sal)*Math.min(1,dt*6);
+  if(S&&LOG){
+    if($('cExp').checked&&Date.now()-lastAct>120000){salir('La sesión expiró por inactividad.');toast('Sesión cerrada por inactividad.')}
+    S.estres=Math.max(0,Math.min(100,S.estres+((S.caso&&S.caso.car.estado==='espera'?1.2:-2)+(S.apagon>0?3:0))*dt*S.vel));
+    if(S.banner&&S.banner.t>0)S.banner.t-=dt;
+    if(S.camFalla>0)S.camFalla-=dt;else if(rnd()<dt/60)S.camFalla=12;
+    if($('cApR').checked&&S.apagon<=0&&rnd()<dt/90)apagar();
+    if(rnd()<dt*.12&&S.ped.length<4){const d=rnd()<.5?1:-1;S.ped.push({x:d>0?-4:196,y:158+rnd()*5,v:(16+rnd()*10)*d,c:pick(['#e67e22','#2980b9','#8e44ad','#16a085','#c0392b'])})}
+    S.ped.forEach(p=>p.x+=p.v*dt*S.vel);S.ped=S.ped.filter(p=>p.x>-8&&p.x<200);
+    if(cur==='ca'&&now-lastCam>120){lastCam=now;dibCams()}
+S.hora+=dt*S.vel/60;
+    barrera.ent+=((S.carros.some(c=>c.estado==='entra'&&c.x<178)?1:0)-barrera.ent)*Math.min(1,dt*6);
+    barrera.sal+=((S.carros.some(c=>c.estado==='sale'&&c.x>118)?1:0)-barrera.sal)*Math.min(1,dt*6);
     actualizarCarros(dt);
     const c=S.caso;
     if(c&&c.pregunta>0){c.pregunta-=dt*S.vel;if(c.pregunta<=0){c.pregunta=0;if(S.apagon>0||!c.cito){c.cito={texto:'No había a quién consultar.',responde:false};c.cito_ok=false}else{c.cito_ok=c.cito.responde;}panel()}}
-    if(c&&c.eval&&S.modo==='auto'&&c.eval.res!=='revisar'&&c.car.estado==='espera'){S.tAuto-=dt*S.vel;if(S.tAuto<=0){S.tAuto=3;ejecutar(c,c.eval.res==='autorizado','Automático','')}}
-    else if(!c||c.car.estado!=='espera')S.tAuto=3;
+    if(c&&c.eval&&S.modo==='auto'&&c.eval.res!=='revisar'&&c.car.estado==='espera'){S.tAuto-=dt*S.vel;if(S.tAuto<=0){S.tAuto=S.segAuto;ejecutar(c,c.eval.res==='autorizado','Automático','')}}
+    else if(!c||c.car.estado!=='espera')S.tAuto=S.segAuto;
     if(S.apagon>0){S.apagon-=dt;if(S.apagon<=0){S.apagon=0;toast('Volvió la luz: el sistema se reinicia y reevalúa.');if(S.caso){S.caso.eval=evaluar(S.caso)}render()}}
     if($('cLleg').checked&&!S.caso&&(cuenta+=dt*S.vel)>8){cuenta=0;generar(rnd()<.6?'Entrada':'Salida')}
-    if(Math.floor(now/1000)!==Math.floor((now-dt*1000)/1000)){hud();if(S.caso&&(S.caso.pregunta>0||S.apagon>0||(S.modo==='auto'&&S.caso.eval&&S.caso.eval.res!=='revisar')))panel()}
+    if(Math.floor(now/1000)!==Math.floor((now-dt*1000)/1000)){hud();if(cur==='pq'||cur==='us')extra();if(S.caso&&(S.caso.pregunta>0||S.apagon>0||(S.modo==='auto'&&S.caso.eval&&S.caso.eval.res!=='revisar')))panel()}
     draw()}
   requestAnimationFrame(tick)}
 
 /* ----- controles ----- */
-function modo(m){S.modo=m;$('mMan').setAttribute('aria-pressed',m==='manual');$('mAut').setAttribute('aria-pressed',m==='auto');S.tAuto=3;panel()}
+function modo(m){S.modo=m;$('mMan').setAttribute('aria-pressed',m==='manual');$('mAut').setAttribute('aria-pressed',m==='auto');S.tAuto=S.segAuto;panel()}
 function vel(v){S.vel=v;$('v1').setAttribute('aria-pressed',v===1);$('v2').setAttribute('aria-pressed',v===2)}
 $('bEnt').onclick=()=>generar('Entrada');$('bSal').onclick=()=>generar('Salida');
 $('mMan').onclick=()=>modo('manual');$('mAut').onclick=()=>modo('auto');$('v1').onclick=()=>vel(1);$('v2').onclick=()=>vel(2);
-$('bApag').onclick=()=>{if(S.apagon>0)return;S.apagon=25;toast('Apagón: el sistema cae. Decida con lo que ve.');if(S.caso){S.caso.eval=null;S.caso.cito_ok=null}render()};
+$('bApag').onclick=apagar;
 $('bReset').onclick=()=>{barrera={ent:0,sal:0};nuevoEstado();$('metr').hidden=true;render();toast('Simulación reiniciada.')};
 $('bMet').onclick=()=>{const m=$('metr');m.hidden=!m.hidden;if(!m.hidden)metricas()};
-$('bCopy').onclick=()=>{const t='hora,sentido,placa,persona,categoria,decision,por,detalle,nota\n'+S.mov.map(m=>[m.hora,m.sent,m.placa,m.quien,m.cat,m.dec,m.por,'"'+m.det+'"','"'+m.nota+'"'].join(',')).join('\n');
-  try{navigator.clipboard.writeText(t).then(()=>toast('Historial copiado.'),()=>toast('No se pudo copiar en este navegador.'))}catch(e){toast('No se pudo copiar en este navegador.')}};
+$('bCopy').onclick=copiar;
+/* ====================== sesión, pestañas y gestión ====================== */
+let LOG=false,PASSH=null,fallos=0,bloqueoHasta=0,lastAct=Date.now(),cur='op';
+async function sha(t){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return'x:'+t}}
+sha('admin123').then(h=>PASSH=h);
+function msgLogin(t,bad){const m=$('lMsg');m.textContent=t;m.style.color=bad?'var(--bad)':'var(--mute)'}
+async function entrar(){
+  const rest=Math.ceil((bloqueoHasta-Date.now())/1000);if(rest>0){msgLogin('Acceso bloqueado. Espere '+rest+' s.',true);return}
+  const u=$('lUser').value.trim(),h=await sha($('lPass').value);
+  if(u==='admin'&&h===PASSH){fallos=0;LOG=true;lastAct=Date.now();$('lPass').value='';msgLogin('');$('login').hidden=true;$('app').hidden=false;render();return}
+  fallos++;if(fallos>=3){fallos=0;bloqueoHasta=Date.now()+15000;msgLogin('Tres intentos fallidos: acceso bloqueado 15 s.',true)}else msgLogin('Usuario o clave incorrectos ('+fallos+' de 3).',true)}
+function salir(m){LOG=false;$('app').hidden=true;$('login').hidden=false;msgLogin(m||'')}
+setInterval(()=>{const r=Math.ceil((bloqueoHasta-Date.now())/1000);if(!LOG&&bloqueoHasta&&r>0)msgLogin('Acceso bloqueado. Espere '+r+' s.',true);else if(!LOG&&bloqueoHasta&&r<=0&&$('lMsg').textContent.indexOf('bloqueado')>=0){bloqueoHasta=0;msgLogin('Ya puede intentar de nuevo.')}},500);
+$('bLogin').onclick=entrar;$('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')entrar()});
+['click','keydown','input'].forEach(ev=>$('sim').addEventListener(ev,()=>lastAct=Date.now()));
+function showTab(t){cur=t;document.querySelectorAll('.tabs [data-t]').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));['op','us','pq','hi','ca','aj'].forEach(x=>$('t-'+x).hidden=x!==t);extra()}
+document.querySelectorAll('.tabs [data-t]').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
+$('bQue').onclick=()=>{$('que').hidden=!$('que').hidden};
+function extra(){if(cur==='us')usTab();if(cur==='pq')pqTab();if(cur==='hi')$('hist2').innerHTML=tablaMov(filtrarMov(),120)}
+
+/* usuarios */
+const selTipos=()=>TKEYS.map(k=>'<option value="'+k+'">'+TIPOS[k]+'</option>').join(''),selCol=()=>CKEYS.map(k=>'<option value="'+k+'">'+COLORES[k]+'</option>').join('');
+['uTip','aTip'].forEach(i=>$(i).innerHTML=selTipos());['uCol','aCol'].forEach(i=>$(i).innerHTML=selCol());
+function usTab(){
+  $('usTab').innerHTML='<table class="utab"><tr><th>Nombre</th><th>Rol</th><th>Cat.</th><th>Apto · Puesto</th><th>Vehículos</th><th>Estado</th><th>Acciones</th></tr>'+S.usuarios.map(u=>'<tr><td>'+u.nombre+' '+u.apellido+'</td><td>'+u.rol+(u.turno?' ('+u.turno+')':'')+'</td><td>'+categoria(u)+(u.vip&&u.vipMotivo?'<br><span class="mute small">'+esc(u.vipMotivo)+'</span>':'')+'</td><td>'+(u.apto||'—')+' · '+(u.parq||'—')+'</td><td>'+u.vehs.map(v=>'<code>'+v.placa+'</code>').join(' ')+'</td><td><span class="pill '+(u.activo?'ok':'bad')+'">'+(u.activo?'activo':'inactivo')+'</span>'+(estaDentro(u.id)?' <span class="pill neu">dentro</span>':'')+'</td><td><button class="btn s" data-a="act" data-id="'+u.id+'">'+(u.activo?'Desactivar':'Activar')+'</button>'+(u.rol==='visitante'?'<button class="btn s" data-a="aut" data-id="'+u.id+'">'+(u.autVig?'Vencer autorización':'Renovar autorización')+'</button>':'')+'</td></tr>').join('')+'</table>';
+  const o=S.usuarios.map(u=>'<option value="'+u.id+'">'+u.nombre+' '+u.apellido+'</option>').join('');['aUsr','vUsr'].forEach(i=>{const e=$(i),v=e.value;e.innerHTML=o;if(v)e.value=v})}
+$('usTab').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(!b)return;const u=uid(+b.dataset.id);if(!u)return;
+  if(b.dataset.a==='act'){if(u.activo&&estaDentro(u.id)){toast('Está dentro del parqueadero: primero debe salir.');return}u.activo=!u.activo;toast(nombre(u)+(u.activo?' activado.':' desactivado: sus accesos se denegarán.'))}
+  else{u.autVig=!u.autVig;toast('Autorización de '+nombre(u)+(u.autVig?' vigente.':' vencida.'))}usTab()});
+const okNom=s=>/^[A-Za-zÁÉÍÓÚáéíóúñÑüÜ .'-]{1,24}$/.test(s),okPla=s=>/^[A-Z]{3}-\d{3}$/.test(s);
+$('bAddU').onclick=()=>{const rol=$('uRol').value,n=$('uNom').value.trim(),a=$('uApe').value.trim(),pl=$('uPla').value.trim().toUpperCase(),ap=$('uApto').value.trim().toUpperCase();
+  if(!okNom(n)||!okNom(a)){toast('Escriba un nombre y un apellido (solo letras).');return}
+  if(!okPla(pl)){toast('La placa debe verse así: ABC-123.');return}
+  if(buscarPlaca(pl)){toast('Esa placa ya está registrada.');return}
+  if(!/^[A-Z0-9 -]{0,8}$/.test(ap)){toast('Apartamento no válido.');return}
+  let parq='';if(rol==='residente'){parq=S.pR.find(p=>!S.usuarios.some(u=>u.parq===p));if(!parq){toast('No quedan puestos de residente sin asignar.');return}}
+  const id=S.sigId++;S.usuarios.push({id,rol,nombre:n,apellido:a,parq,apto:ap,turno:rol==='trabajador'?$('uTur').value:'',autPor:'',rostro:nuevoRostro(),vip:false,activo:true,autVig:rol==='visitante',vehs:[{placa:pl,tipo:$('uTip').value,color:$('uCol').value}]});
+  ['uNom','uApe','uPla','uApto'].forEach(i=>$(i).value='');toast(n+' '+a+' quedó registrado'+(parq?' con el puesto '+parq:'')+'.');usTab()};
+$('bAddV').onclick=()=>{const u=uid(+$('aUsr').value),pl=$('aPla').value.trim().toUpperCase();
+  if(!u)return;if(!okPla(pl)){toast('La placa debe verse así: ABC-123.');return}if(buscarPlaca(pl)){toast('Esa placa ya está registrada.');return}
+  u.vehs.push({placa:pl,tipo:$('aTip').value,color:$('aCol').value});$('aPla').value='';toast('Vehículo agregado a '+nombre(u)+'.');usTab()};
+function vip(on){const u=uid(+$('vUsr').value),m=$('vMot').value.trim();if(!u)return;
+  if(m.length<4){toast('Escriba el motivo del cambio (mínimo 4 letras).');return}
+  if(u.rol==='trabajador'){toast('La categoría VIP aplica a residentes y visitantes.');return}
+  u.vip=on;u.vipMotivo=m;$('vMot').value='';toast(nombre(u)+(on?' pasó a VIP.':' dejó de ser VIP.')+' Motivo guardado.');usTab()}
+$('bVipOn').onclick=()=>vip(true);$('bVipOff').onclick=()=>vip(false);
+
+/* parqueadero */
+function pqTab(){const f=(lista,id)=>{$(id).innerHTML=lista.map(p=>{const o=S.ocup[p],u=o?uid(o):null,v=u?(u.vehs.find(v=>v.placa===S.carroDe[o])||u.vehs[0]):null;
+    return'<div class="pq '+(o?'o':'')+'" title="'+(u?nombre(u)+' · '+v.placa:'Libre')+'">'+p+'<small>'+(v?v.placa:'libre')+'</small></div>'}).join('')};
+  f(S.pR,'gR');f(S.pV,'gV');const lr=S.pR.filter(p=>!S.ocup[p]).length,lv=S.pV.filter(p=>!S.ocup[p]).length;$('pqR').textContent='· '+lr+' libres de '+N_R;$('pqV').textContent='· '+lv+' libres de '+N_V}
+
+/* historial */
+['fSen','fDec'].forEach(i=>$(i).onchange=extra);$('fTxt').oninput=extra;$('bCopy2').onclick=copiar;
+
+/* cámaras */
+const CAMS=[['Entrada',110,190,240],['Salida',110,230,240],['Garita',176,210,200],['Residentes',470,70,340],['Visitantes',470,250,340],['Perímetro',380,165,560]];
+const camPan=CAMS.map(()=>[0,0]);let camSel=0,lastCam=0;
+$('thumbs').innerHTML=CAMS.map((c,i)=>'<button data-c="'+i+'" aria-pressed="'+(i===0)+'" aria-label="Cámara '+(i+1)+': '+c[0]+'"><canvas id="camT'+i+'" width="240" height="135"></canvas></button>').join('');
+$('thumbs').onclick=e=>{const b=e.target.closest('button[data-c]');if(!b)return;camSel=+b.dataset.c;document.querySelectorAll('#thumbs button').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.c===camSel))};
+document.querySelectorAll('[data-pan]').forEach(b=>b.onclick=()=>{const [dx,dy]=b.dataset.pan.split(',').map(Number);camPan[camSel][0]+=dx*30;camPan[camSel][1]+=dy*30});
+function camFalla(i){return S.apagon>0||(i===5&&S.camFalla>0)}
+function dibCam(c,i){const w=c.width,h=c.height,x=c.getContext('2d');x.fillStyle='#05080d';x.fillRect(0,0,w,h);
+  if(camFalla(i)){x.fillStyle='#9fb0c4';x.font='700 '+Math.round(h/9)+'px JetBrains Mono,monospace';x.textAlign='center';x.fillText('SIN SEÑAL',w/2,h/2);for(let k=0;k<60;k++){x.fillStyle='rgba(255,255,255,'+Math.random()*.18+')';x.fillRect(Math.random()*w,Math.random()*h,3,1)}}
+  else{const vw=CAMS[i][3],vh=vw*h/w;let sx=CAMS[i][1]-vw/2+camPan[i][0],sy=CAMS[i][2]-vh/2+camPan[i][1];sx=Math.max(0,Math.min(760-vw,sx));sy=Math.max(0,Math.min(330-vh,sy));camPan[i][0]=sx-(CAMS[i][1]-vw/2);camPan[i][1]=sy-(CAMS[i][2]-vh/2);
+    x.save();if(x.filter!==undefined)x.filter='grayscale(.9) contrast(1.2)';x.drawImage(cv,sx,sy,Math.min(vw,760),Math.min(vh,330),0,0,w,h);x.restore()}
+  x.textAlign='left';x.fillStyle='#e8eef7';x.font='600 '+Math.round(h/14)+'px JetBrains Mono,monospace';x.fillText('CAM '+(i+1)+' · '+CAMS[i][0],8,h/10);x.fillText(horaTxt(),8,h-8);x.fillStyle='#ff4d4d';x.beginPath();x.arc(w-16,h/10-4,5,0,7);x.fill()}
+function dibCams(){CAMS.forEach((c,i)=>dibCam($('camT'+i),i));dibCam($('camG'),camSel);$('camN').textContent='Cámara '+(camSel+1)+': '+CAMS[camSel][0]+(camFalla(camSel)?' · sin señal':'')}
+
+/* ajustes */
+$('rSeg').oninput=()=>{S.segAuto=+$('rSeg').value;S.tAuto=S.segAuto;$('rSegV').textContent=$('rSeg').value};
+$('cCctv').onchange=()=>$('mapa').classList.toggle('cctv',$('cCctv').checked);
+$('bPass').onclick=async()=>{const o=await sha($('pOld').value),n=$('pNew').value;if(o!==PASSH){toast('La clave actual no es correcta.');return}if(n.length<6){toast('La clave nueva necesita al menos 6 caracteres.');return}PASSH=await sha(n);$('pOld').value=$('pNew').value='';toast('Clave cambiada. Úsela la próxima vez que ingrese.')};
+$('bOut').onclick=()=>salir('Sesión cerrada.');
+function apagar(){if(S.apagon>0)return;S.apagon=25;toast('Apagón: el sistema cae. Decida con lo que ve.');if(S.caso){S.caso.eval=null;S.caso.cito_ok=null}render()}
+
 nuevoEstado();render();requestAnimationFrame(tick);
 </script>

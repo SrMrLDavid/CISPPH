@@ -49,7 +49,7 @@ ControlAcceso control(PUESTOS_VISITANTES, BLOQUEO_MS);
 MFRC522 lector(PIN_SS, PIN_RST);
 #endif
 
-// Tarjetas de ejemplo (UID ficticios). Reemplácelos por los de sus tarjetas.
+// Tarjetas de ejemplo (UID de ejemplo). Reemplácelos por los de sus tarjetas.
 const uint8_t UID_RESIDENTE[LONG_UID] = {0xDE, 0xAD, 0xBE, 0x01};
 const uint8_t UID_VISITANTE[LONG_UID] = {0xDE, 0xAD, 0xBE, 0x02};
 const uint8_t UID_VIP[LONG_UID] = {0xDE, 0xAD, 0xBE, 0x03};

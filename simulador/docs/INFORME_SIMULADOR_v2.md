@@ -30,7 +30,7 @@ Extras: nota opcional del guardia que queda en el historial; los casos con otro 
 - Un usuario solo puede estar con **un** vehículo dentro a la vez (un puesto por usuario). Si una familia debe tener dos coches dentro al mismo tiempo, hay que definir la regla (¿dos puestos?).
 - La retroalimentación («acertaste/fallaste») es solo didáctica; puedes ocultarla si no la quieren en la demo (avísame).
 - Sigue sin haber tarifas, minutos de gracia ni VIS/VIP/No VIP (sin validar). El reconocimiento facial y la lectura de placa siguen simulados.
-- Los nombres y documentos de los conductores aleatorios son inventados por el generador de la simulación (no son datos reales).
+- Los nombres y documentos de los conductores aleatorios los crea el generador de casos del simulador.
 
 ## 5. Archivos cambiados
 `scripts/sistema.gd` (vehículos adicionales, identificar rostro, vehículo en la evaluación), `scripts/generador_casos.gd` (reescrito: personas, citófono, casos de robo), `scripts/principal.gd` (inspección, notas, retroalimentación), `scripts/interfaz.gd` (ventanas flotantes, ventana de inspección, precargas), `tools/pruebas/*`, `docs/*`. Ecos del Cosmos no se tocó.

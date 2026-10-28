@@ -1,6 +1,6 @@
 # Documentos del proyecto
 
-Todos los documentos están en [`documentos/`](documentos/) con el nombre de su tarjeta de Trello. Siguen APA 7 y el encabezado institucional del docente. El cliente del caso es ficticio.
+Todos los documentos están en [`documentos/`](documentos/) con el nombre de su tarjeta de Trello. Siguen APA 7 y el encabezado institucional del docente.
 
 | Tarjeta de Trello | Lista | Archivo |
 |---|---|---|
