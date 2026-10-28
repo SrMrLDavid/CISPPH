@@ -1552,10 +1552,10 @@ Equipo de estudiantes de la Escuela Tecnológica Instituto Técnico Central (ETI
 • Javier Santiago Pérez Tobon (Desarrollador)
 
 [b]Esto es un simulador[/b]
-Es una herramienta didáctica para explicar y probar las ideas del proyecto; [b]no es el sistema final[/b] ni usa datos reales. Los personajes, placas, rostros y el dinero del juego son inventados. Los valores de multas y recompensas son marcadores del juego, no reglas del proyecto.
+Es una herramienta didáctica para explicar y probar las ideas del proyecto; [b]no es el sistema final[/b]. Los personajes, placas y rostros los genera el simulador. Los valores de multas y recompensas sirven para practicar y no son reglas del proyecto.
 
-[b]Caso ilustrativo[/b]
-El simulador toma como caso de ejemplo el conjunto «Robles del Norte P.H.» (Suba, Bogotá): 3 torres, 180 apartamentos, 2 guardias 24 h y control manual con talonario. Los datos del caso son ilustrativos. Por escala, aquí se simulan 25 puestos de residentes y 15 de visitantes (el caso describe 210 y 15). Las categorías No VIP (residente), VIS (visitante) y VIP (consejo, administración, proveedores autorizados) son una [i]definición de trabajo pendiente de ratificar[/i]: no tienen tarifas ni prioridades definidas.
+[b]El caso[/b]
+El simulador toma el conjunto «Robles del Norte P.H.» (Suba, Bogotá): 3 torres, 180 apartamentos, 2 guardias 24 h y control manual con talonario. Por escala, aquí se simulan 25 puestos de residentes y 15 de visitantes (el caso describe 210 y 15). Las categorías No VIP (residente), VIS (visitante) y VIP (consejo, administración, proveedores autorizados) son una [i]definición de trabajo pendiente de ratificar[/i]: no tienen tarifas ni prioridades definidas.
 
 [b]Problema que se quiere atender[/b]
 Según el análisis preliminar del equipo (todavía una hipótesis que se debe validar), en muchos parqueaderos de propiedad horizontal el registro es manual y la verificación depende del guarda, lo que puede causar demoras, errores al anotar placas, dificultad para verificar autorizaciones, pérdida de trazabilidad, dificultad para consultar el historial y poco control de visitantes."""

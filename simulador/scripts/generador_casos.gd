@@ -1,8 +1,7 @@
 extends RefCounted
 class_name GeneradorCasos
 
-# CISPPH - Genera los casos de acceso que llegan a la garita (adaptado del "protocolo Umbral" de
-# Ecos del Cosmos: cada caso es una situacion con un defecto posible que el sistema o el guardia
+# CISPPH - Genera los casos de acceso que llegan a la garita (cada caso es una situacion con un defecto posible que el sistema o el guardia
 # deben detectar). Todo es simulado: la "lectura" de placa es el texto de la placa del vehiculo y el
 # "reconocimiento facial" compara los numeros de rostro (ver Sistema.distancia_rostro).
 #

@@ -1,6 +1,6 @@
 extends Control
 
-# Entrada 035 — Rostro ficticio procedural (caricatura). Se genera de un numero: mismo numero,
+# Entrada 035 — Rostro procedural (caricatura). Se genera de un numero: mismo numero,
 # misma cara. NO usa fotos ni rostros reales. Sirve para el conductor y para la foto del documento:
 # si los numeros difieren, las caras difieren y el jugador puede notarlo.
 
