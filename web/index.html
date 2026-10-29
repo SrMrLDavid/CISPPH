@@ -745,7 +745,7 @@ function filtrarMov(){const s=$('fSen').value,d=$('fDec').value,t=$('fTxt').valu
   return S.mov.filter(m=>(!s||m.sent===s)&&(!d||m.dec===d)&&(!t||(m.placa+' '+m.quien).toLowerCase().includes(t)))}
 function histo(){$('hist').innerHTML=tablaMov(S.mov,8)}
 function csv(){return'hora,sentido,placa,persona,categoria,decision,por,detalle,nota\n'+S.mov.map(m=>[m.hora,m.sent,m.placa,m.quien,m.cat,m.dec,m.por,'"'+m.det+'"','"'+m.nota.replace(/"/g,"'")+'"'].join(',')).join('\n')}
-function descargar(){try{const q=v=>'"'+String(v==null?'':v).replace(/"/g,"'")+'"';
+function descargar(){if(window.self!==window.top){toast('Aquí no se puede descargar: se copia el historial. Pegue en Excel o abra la página directamente.');copiar();return}try{const q=v=>'"'+String(v==null?'':v).replace(/"/g,"'")+'"';
 const filas=[['Hora','Sentido','Placa','Persona','Categoría','Decisión','Decidió','Detalle','Nota']].concat(S.mov.map(m=>[m.hora,m.sent,m.placa,m.quien,m.cat,m.dec,m.por,m.det,m.nota]));
 const blob=new Blob(['\ufeff'+filas.map(f=>f.map(q).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'});
 const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='historial_cispph_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);toast('Historial descargado ('+S.mov.length+' movimientos).')}catch(e){toast('No se pudo descargar en este navegador.')}}
