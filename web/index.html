@@ -1,4 +1,5 @@
 <title>CISPPH Parqueaderos</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
@@ -37,7 +38,9 @@ p{margin:0 0 14px;max-width:66ch}.mute{color:var(--mute)}.small{font-size:.9rem}
 .logo{font:700 1.05rem var(--f-d);margin-right:auto;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
 .logo i{width:22px;height:22px;border-radius:7px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:inline-block}
 .top a.l{color:var(--mute);text-decoration:none;font-weight:500;font-size:.95rem;padding:6px 10px;border-radius:8px}.top a.l:hover{color:var(--ink);background:var(--soft)}
-@media(max-width:760px){.top a.l.x{display:none}}
+.top .nv{display:contents}
+@media(pointer:coarse){.btn,.seg button,.tabs button{min-height:44px}}
+@media(max-width:760px){.top .nv{display:flex;order:10;width:100%;overflow-x:auto;gap:2px;scrollbar-width:none;padding-bottom:2px}.top .nv::-webkit-scrollbar{display:none}.top a.l.x{white-space:nowrap;flex:0 0 auto}}
 .btn{font:600 .95rem var(--f-b);padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;line-height:1.2}
 .btn:hover{border-color:var(--acc)} .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.p{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)} .btn.p:hover{filter:brightness(1.08)}
@@ -154,7 +157,7 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
 
 <header class="top"><div class="w">
   <a class="logo" href="#inicio"><i></i>CISPPH</a>
-  <a class="l x" data-p="inicio" href="#inicio">Inicio</a><a class="l x" data-p="producto" href="#producto">Producto</a><a class="l x" data-p="como" href="#como">Cómo funciona</a><a class="l x" data-p="demo" href="#demo">Demostración</a><a class="l x" data-p="nosotros" href="#nosotros">Nosotros</a>
+  <nav class="nv" aria-label="Secciones"><a class="l x" data-p="inicio" href="#inicio">Inicio</a><a class="l x" data-p="producto" href="#producto">Producto</a><a class="l x" data-p="como" href="#como">Cómo funciona</a><a class="l x" data-p="demo" href="#demo">Demostración</a><a class="l x" data-p="nosotros" href="#nosotros">Nosotros</a></nav>
   <button class="btn s" id="tema" aria-label="Cambiar entre tema claro y oscuro">Tema</button>
   <a class="btn p s cta" href="#demo">Probar ahora</a>
 </div></header>
@@ -367,6 +370,7 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
             <div class="ctl">
               <label><input type="checkbox" id="cLleg"> Llegadas automáticas</label>
               <label><input type="checkbox" id="cErr"> Error de conexión (7 %)</label>
+              <label title="Como se trabaja hoy: sin veredicto del sistema; decide solo con lo que ve"><input type="checkbox" id="cMano"> Trabajar a mano (sin el sistema)</label>
               <button class="btn s" id="bApag">Provocar apagón</button>
               <button class="btn s" id="bReset">Reiniciar</button>
             </div>
@@ -419,7 +423,7 @@ footer{padding-block:40px 60px;color:var(--mute);font-size:.9rem;border-top:1px 
           <div><label for="fSen">Sentido</label><select class="inp" id="fSen"><option value="">Todos</option><option>Entrada</option><option>Salida</option></select></div>
           <div><label for="fDec">Decisión</label><select class="inp" id="fDec"><option value="">Todas</option><option value="permitido">Permitido</option><option value="denegado">Denegado</option></select></div>
           <div><label for="fTxt">Placa o persona</label><input class="inp" id="fTxt" maxlength="20"></div>
-          <div><button class="btn s" id="bCopy2">Copiar historial</button></div>
+          <div class="row"><button class="btn s" id="bCopy2">Copiar historial</button><button class="btn s" id="bDown">Descargar CSV (Excel)</button></div>
         </div>
         <div class="hist scroll" id="hist2" style="max-height:420px"></div>
       </div>
@@ -532,7 +536,7 @@ function descVeh(v){return TIPOS[v.tipo]+' '+COLORES[v.color]}
 function nombre(u){return u.nombre+' '+u.apellido}
 function nuevoEstado(){
   const E={usuarios:[],dentro:{},ocup:{},mov:[],hora:17.5,dinero:0,aciertos:0,dudosos:0,fallos:0,caso:null,
-    modo:'auto',vel:1,apagon:0,estres:0,segAuto:+(($('rSeg')||{}).value||3),ped:[],banner:null,camFalla:0,sigId:1,tAuto:0,carros:[],tiemposG:[],nAuto:0,nGuardia:0,usoInsp:0};
+    modo:'auto',vel:1,apagon:0,estres:0,segAuto:+(($('rSeg')||{}).value||3),ped:[],banner:null,camFalla:0,sigId:1,tAuto:0,carros:[],tiemposG:[],nAuto:0,nGuardia:0,usoInsp:0,cmp:{sis:{n:0,ok:0,t:[]},mano:{n:0,ok:0,t:[]}}};
   E.pR=[];E.pV=[];for(let i=1;i<=N_R;i++)E.pR.push('R-'+String(i).padStart(2,'0'));for(let i=1;i<=N_V;i++)E.pV.push('V-'+String(i).padStart(2,'0'));
   [...E.pR,...E.pV].forEach(p=>E.ocup[p]=0);
   BASE.forEach(b=>{const id=E.sigId++;E.usuarios.push({id,rol:b[0],nombre:b[1],apellido:b[2],parq:b[3],apto:b[5],turno:b[6],autPor:b[7],rostro:1000+id*37,
@@ -612,7 +616,7 @@ function generar(sent){
   const c=sent==='Salida'?genSalida():genEntrada();
   if(!c){toast('No hay nadie dentro: genere una entrada.');return}
   c.t0=performance.now();c.vista=null;c.cito_ok=null;c.pregunta=0;c.regVis=false;
-  c.eval=S.apagon>0?null:evaluar(c);S.caso=c;
+  c.eval=(S.apagon>0||$('cMano').checked)?null:evaluar(c);S.caso=c;
   const car=nuevoCarro(c);car.estado='llega';S.carros.push(car);c.car=car;
   if(c.sentido==='Salida')toast('Un vehículo se acerca a la barrera de salida.');
   render()}
@@ -643,7 +647,9 @@ function ejecutar(c,permitir,por,nota){
     c.car.estado=c.sentido==='Entrada'?'retira':'vuelve';
 }
   if(por!=='Automático'){S.nGuardia++;S.tiemposG.push((performance.now()-c.t0)/1000)}else S.nAuto++;
-  puntuar(c,permitir,por);S.caso=null;S.pend=null;barreraAbre(c,permitir);render();return true}
+  cmpReg(c,permitir,por);puntuar(c,permitir,por);S.caso=null;S.pend=null;barreraAbre(c,permitir);render();return true}
+/* comparación con y sin el sistema: solo cuenta las decisiones de esta sesión */
+function cmpReg(c,permitir,por){const k=($('cMano').checked||c.sinSis)?'mano':'sis';const o=S.cmp[k];o.n++;if(permitir===c.legit)o.ok++;if(por!=='Automático')o.t.push((performance.now()-c.t0)/1000)}
 function puntuar(c,permitir,por){
   if(por==='Automático')return;
   const dudoso=c.eval?c.eval.res==='revisar':true;if(!dudoso)return;S.dudosos++;
@@ -739,9 +745,15 @@ function filtrarMov(){const s=$('fSen').value,d=$('fDec').value,t=$('fTxt').valu
   return S.mov.filter(m=>(!s||m.sent===s)&&(!d||m.dec===d)&&(!t||(m.placa+' '+m.quien).toLowerCase().includes(t)))}
 function histo(){$('hist').innerHTML=tablaMov(S.mov,8)}
 function csv(){return'hora,sentido,placa,persona,categoria,decision,por,detalle,nota\n'+S.mov.map(m=>[m.hora,m.sent,m.placa,m.quien,m.cat,m.dec,m.por,'"'+m.det+'"','"'+m.nota.replace(/"/g,"'")+'"'].join(',')).join('\n')}
+function descargar(){try{const q=v=>'"'+String(v==null?'':v).replace(/"/g,"'")+'"';
+const filas=[['Hora','Sentido','Placa','Persona','Categoría','Decisión','Decidió','Detalle','Nota']].concat(S.mov.map(m=>[m.hora,m.sent,m.placa,m.quien,m.cat,m.dec,m.por,m.det,m.nota]));
+const blob=new Blob(['\ufeff'+filas.map(f=>f.map(q).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='historial_cispph_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500);toast('Historial descargado ('+S.mov.length+' movimientos).')}catch(e){toast('No se pudo descargar en este navegador.')}}
 function copiar(){try{navigator.clipboard.writeText(csv()).then(()=>toast('Historial copiado.'),()=>toast('No se pudo copiar en este navegador.'))}catch(e){toast('No se pudo copiar en este navegador.')}}
+function cmpTxt(){const f=(o,nom)=>{const m=o.t.length?(o.t.reduce((a,b)=>a+b,0)/o.t.length).toFixed(1)+' s':'—';return'<b>'+nom+':</b> '+o.n+' decisiones, '+o.ok+' correctas'+(o.n?' ('+Math.round(100*o.ok/o.n)+' %)':'')+', tiempo medio del guarda '+m};
+  return'<br><br><b>Con y sin el sistema (solo esta sesión)</b><br>'+f(S.cmp.sis,'Con el sistema')+'<br>'+f(S.cmp.mano,'A mano')+'<br><span class="small mute">«Correcta» = permitió a quien era legítimo o negó a quien no lo era. Son pocos casos de una sola persona: sirve para ilustrar la diferencia entre el proceso de hoy (a mano) y el propuesto, no demuestra una mejora real. Marque «Trabajar a mano» para probar la forma actual de trabajo.</span>'}
 function metricas(){const t=S.tiemposG,n=t.length,pr=n?(t.reduce((a,b)=>a+b,0)/n).toFixed(1):'—';
-  $('metr').innerHTML='<b>Métricas de esta sesión</b><p class="small mute" style="margin:6px 0 0">Decisiones del guarda: <b>'+S.nGuardia+'</b> · automáticas: <b>'+S.nAuto+'</b> · tiempo de decisión del guarda (promedio / mín. / máx.): <b>'+pr+' s'+(n?' / '+Math.min(...t).toFixed(1)+' s / '+Math.max(...t).toFixed(1)+' s':'')+'</b> · consultas al citófono o «preguntar»: <b>'+S.usoInsp+'</b> · aciertos en casos dudosos: <b>'+S.aciertos+' de '+S.dudosos+'</b>.<br>Este tiempo incluye el tiempo de pensar de la persona: no mide el requisito de rendimiento (RNF-003).</p>'}
+  $('metr').innerHTML='<b>Métricas de esta sesión</b><p class="small mute" style="margin:6px 0 0">Decisiones del guarda: <b>'+S.nGuardia+'</b> · automáticas: <b>'+S.nAuto+'</b> · tiempo de decisión del guarda (promedio / mín. / máx.): <b>'+pr+' s'+(n?' / '+Math.min(...t).toFixed(1)+' s / '+Math.max(...t).toFixed(1)+' s':'')+'</b> · consultas al citófono o «preguntar»: <b>'+S.usoInsp+'</b> · aciertos en casos dudosos: <b>'+S.aciertos+' de '+S.dudosos+'</b>.<br>Este tiempo incluye el tiempo de pensar de la persona: no mide el requisito de rendimiento (RNF-003).'+cmpTxt()+'</p>'}
 function render(){hud();panel();histo();if(!$('metr').hidden)metricas();extra();draw()}
 
 /* ----- mapa: geometría ----- */
@@ -827,7 +839,7 @@ S.hora+=dt*S.vel/60;
     if(c&&c.pregunta>0){c.pregunta-=dt*S.vel;if(c.pregunta<=0){c.pregunta=0;if(S.apagon>0||!c.cito){c.cito={texto:'No había a quién consultar.',responde:false};c.cito_ok=false}else{c.cito_ok=c.cito.responde;}panel()}}
     if(c&&c.eval&&S.modo==='auto'&&c.eval.res!=='revisar'&&c.car.estado==='espera'){S.tAuto-=dt*S.vel;if(S.tAuto<=0){S.tAuto=S.segAuto;ejecutar(c,c.eval.res==='autorizado','Automático','')}}
     else if(!c||c.car.estado!=='espera')S.tAuto=S.segAuto;
-    if(S.apagon>0){S.apagon-=dt;if(S.apagon<=0){S.apagon=0;toast('Volvió la luz: el sistema se reinicia y reevalúa.');if(S.caso){S.caso.eval=evaluar(S.caso)}render()}}
+    if(S.apagon>0){S.apagon-=dt;if(S.apagon<=0){S.apagon=0;toast('Volvió la luz: el sistema se reinicia y reevalúa.');if(S.caso&&!$('cMano').checked){S.caso.eval=evaluar(S.caso)}render()}}
     if($('cLleg').checked&&!S.caso&&(cuenta+=dt*S.vel)>8){cuenta=0;generar(rnd()<.6?'Entrada':'Salida')}
     if(Math.floor(now/1000)!==Math.floor((now-dt*1000)/1000)){hud();if(cur==='pq'||cur==='us')extra();if(S.caso&&(S.caso.pregunta>0||S.apagon>0||(S.modo==='auto'&&S.caso.eval&&S.caso.eval.res!=='revisar')))panel()}
     draw()}
@@ -894,7 +906,7 @@ function pqTab(){const f=(lista,id)=>{$(id).innerHTML=lista.map(p=>{const o=S.oc
   f(S.pR,'gR');f(S.pV,'gV');const lr=S.pR.filter(p=>!S.ocup[p]).length,lv=S.pV.filter(p=>!S.ocup[p]).length;$('pqR').textContent='· '+lr+' libres de '+N_R;$('pqV').textContent='· '+lv+' libres de '+N_V}
 
 /* historial */
-['fSen','fDec'].forEach(i=>$(i).onchange=extra);$('fTxt').oninput=extra;$('bCopy2').onclick=copiar;
+['fSen','fDec'].forEach(i=>$(i).onchange=extra);$('fTxt').oninput=extra;$('bCopy2').onclick=copiar;$('bDown').onclick=descargar;
 
 /* cámaras */
 const CAMS=[['Entrada',110,190,240],['Salida',110,230,240],['Garita',176,210,200],['Residentes',470,70,340],['Visitantes',470,250,340],['Perímetro',380,165,560]];
