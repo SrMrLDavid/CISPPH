@@ -3,7 +3,7 @@
 Programa de escritorio para la portería de **Robles del Norte P.H.**.
 Funciona como una portería completa con solo un computador y su cámara: la pluma y la pantalla de mensajes aparecen en la ventana, y el Arduino es opcional. Una cámara reconoce el rostro, el sistema consulta las reglas del conjunto y decide: **Autorizado**, **Revisar** (decide el guarda) o **Denegado**. Todo queda registrado.
 
-> **Estado honesto:** las reglas (`nucleo.py`) y el puente con Arduino tienen pruebas automáticas que pasan (52 pruebas). **No se ha probado** en este entorno la ventana (CustomTkinter), la cámara real, `face_recognition`/dlib ni el Arduino físico. Eso se valida en el computador del equipo.
+> **Estado honesto:** las reglas (`nucleo.py`) y el puente con Arduino tienen pruebas automáticas que pasan (57 pruebas). **No se ha probado** en este entorno la ventana (CustomTkinter), la cámara real, `face_recognition`/dlib ni el Arduino físico. Eso se valida en el computador del equipo.
 
 ## Archivos
 | Archivo | Para qué sirve |
@@ -29,10 +29,12 @@ Usuario de demostración: `admin` / `admin123` (cámbielo antes de cualquier uso
 - El programa **abre aunque `face_recognition` no se haya podido instalar**; en ese caso avisa en la consola y se opera con *Ingreso manual*.
 - En *Operación*, escriba la **cédula o la placa** en «Ingreso manual» y pulse *Validar manual*: se aplican las mismas reglas (dentro/fuera, cupo de visitantes, autorización, turno, revisión del guarda, bloqueo tras 3 intentos).
 - Sin reconocimiento facial también se puede **registrar** a una persona (sin fotos).
-- El interruptor **Contingencia** marca en el historial los movimientos hechos durante una emergencia.
+- El interruptor **Contingencia** (sin energía principal): el sistema deja de decidir solo y el guarda confirma cada entrada y salida; esos movimientos quedan marcados en el historial.
+- Si una visita queda en revisión, la ventana recuerda llamar por citófono a quien la autorizó.
+- **Reportar novedad**: deja constancia de un intento de robo, suplantación, vehículo sospechoso o falla de equipo (tabla `novedades`).
 
 ## Reportes
-En *Estado Parqueadero*: escriba «Desde» y «Hasta» (AAAA-MM-DD, vacío = sin límite) y pulse *Resumen* (entradas, salidas, denegados, casos permitidos por el guarda, por categoría) o *Exportar CSV* (carpeta `reportes/`, abre en Excel).
+En *Estado Parqueadero*: escriba «Desde» y «Hasta» (AAAA-MM-DD, vacío = sin límite) y pulse *Resumen* (entradas, salidas, denegados, casos permitidos por el guarda, por categoría) o *Exportar CSV* (carpeta `reportes/`, abre en Excel; también genera el archivo de novedades).
 
 ## Arduino (opcional)
 1. Cargue `prototipo-arduino/cispph/cispph.ino` en el Arduino UNO.

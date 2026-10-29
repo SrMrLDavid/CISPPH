@@ -126,6 +126,9 @@ def iniciar_db(conn: sqlite3.Connection) -> None:
         conn.executemany("INSERT INTO tipos_identificacion (nombre_tipo) VALUES (?)",
                          [(t,) for t in TIPOS_ID_INICIALES])
     conn.execute("CREATE TABLE IF NOT EXISTS config (clave TEXT PRIMARY KEY, valor TEXT NOT NULL)")
+    conn.execute("""CREATE TABLE IF NOT EXISTS novedades (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, fecha TEXT NOT NULL, tipo TEXT NOT NULL,
+        descripcion TEXT NOT NULL, placa TEXT DEFAULT '', registrado_por TEXT DEFAULT '')""")
     por_defecto = {"admin_user": USUARIO_POR_DEFECTO, "admin_hash": hash_password(CLAVE_POR_DEFECTO),
                    "cupo_visitantes": str(CUPO_VISITANTES_POR_DEFECTO), "vip_consume_cupo": "0"}
     for clave, valor in por_defecto.items():
@@ -370,6 +373,18 @@ def exportar_historial_csv(conn: sqlite3.Connection, ruta, desde: str = "", hast
     return len(filas)
 
 
+def exportar_novedades_csv(conn: sqlite3.Connection, ruta, desde: str = "", hasta: str = "") -> int:
+    """Guarda las novedades del rango en un CSV que abre Excel. Devuelve cuántas filas escribió."""
+    import csv
+    filas = listar_novedades(conn, desde, hasta)
+    with open(ruta, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.writer(f, delimiter=";")
+        w.writerow(["Fecha y hora", "Tipo", "Descripción", "Placa", "Registrado por"])
+        for x in filas:
+            w.writerow([x["fecha"], x["tipo"], x["descripcion"], x["placa"], x["registrado_por"]])
+    return len(filas)
+
+
 def resumen_periodo(conn: sqlite3.Connection, desde: str = "", hasta: str = "") -> dict:
     """Cuenta entradas, salidas y denegados del rango, y los casos que el guarda permitió tras una revisión."""
     filas = historial(conn, desde, hasta)
@@ -387,4 +402,32 @@ def resumen_periodo(conn: sqlite3.Connection, desde: str = "", hasta: str = "") 
         cat = f["categoria"] or "Sin categoría"
         r["por_categoria"][cat] = r["por_categoria"].get(cat, 0) + 1
     r["total"] = len(filas)
+    r["novedades"] = len(listar_novedades(conn, desde, hasta))
     return r
+
+
+# ----------------------------------------------------------------------------- novedades (robo, sospecha...)
+TIPOS_NOVEDAD = ("Intento de robo", "Suplantación sospechosa", "Vehículo sospechoso", "Falla de equipo", "Otra")
+
+
+def registrar_novedad(conn: sqlite3.Connection, tipo: str, descripcion: str, placa: str = "",
+                      registrado_por: str = "Guardia", ahora: Optional[datetime.datetime] = None) -> int:
+    """Deja constancia de algo anormal que el guarda observó (intento de robo, suplantación, falla...)."""
+    if tipo not in TIPOS_NOVEDAD:
+        raise ValueError("Tipo de novedad inválido")
+    if not (descripcion or "").strip():
+        raise ValueError("Describa lo que ocurrió")
+    cur = conn.execute("INSERT INTO novedades (fecha, tipo, descripcion, placa, registrado_por) VALUES (?,?,?,?,?)",
+                       (ahora_texto(ahora), tipo, descripcion.strip(), normalizar_placa(placa), registrado_por))
+    conn.commit()
+    return cur.lastrowid
+
+
+def listar_novedades(conn: sqlite3.Connection, desde: str = "", hasta: str = "") -> list:
+    ini, fin = rango_fechas(desde, hasta)
+    sql, args = "SELECT * FROM novedades WHERE 1=1", []
+    if ini:
+        sql += " AND fecha >= ?"; args.append(ini)
+    if fin:
+        sql += " AND fecha <= ?"; args.append(fin)
+    return conn.execute(sql + " ORDER BY id", args).fetchall()

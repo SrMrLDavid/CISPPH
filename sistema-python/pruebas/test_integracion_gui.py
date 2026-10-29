@@ -31,7 +31,7 @@ import nucleo                  # noqa: E402
 
 class TestFlujoReconocimiento(unittest.TestCase):
     def setUp(self):
-        cn = nucleo.conectar(pp.DB_FILE); cn.execute("DELETE FROM entrada_salida"); cn.execute("DELETE FROM usuarios"); cn.commit()
+        cn = nucleo.conectar(pp.DB_FILE); cn.execute("DELETE FROM entrada_salida"); cn.execute("DELETE FROM usuarios"); cn.commit(); nucleo.fijar_contingencia(cn, False)
         self.cn = cn
         self.addCleanup(cn.close)
         self.ids = {}
@@ -151,6 +151,22 @@ class TestFlujoReconocimiento(unittest.TestCase):
         nucleo.fijar_contingencia(self.cn, True)
         self.manual("res")
         self.assertIn("contingencia", self.cn.execute("SELECT detalle FROM entrada_salida").fetchone()["detalle"])
+
+    def test_contingencia_el_guarda_confirma_cada_caso(self):
+        nucleo.fijar_contingencia(self.cn, True)
+        pp.messagebox.askyesno.reset_mock(); pp.messagebox.askyesno.return_value = False
+        self.manual("res")                                   # normalmente entraría solo
+        pp.messagebox.askyesno.assert_called_once(); self.assertEqual(self.estados(), ["Denegado"])
+        pp.messagebox.askyesno.return_value = True
+        self.manual("res")
+        self.assertEqual(self.estados(), ["Denegado", "Entrada"])
+
+    def test_citofono_se_sugiere_al_visitante_en_revision(self):
+        self.cn.execute("UPDATE usuarios SET autorizacion_activa = 0 WHERE id = ?", (self.ids["vis"],)); self.cn.commit()
+        pp.messagebox.askyesno.reset_mock(); pp.messagebox.askyesno.return_value = False
+        self.manual("vis")
+        self.assertIn("Carlos", pp.messagebox.askyesno.call_args[0][1])
+        self.assertIn("Citófono", pp.messagebox.askyesno.call_args[0][1])
 
     def test_manual_visitante_sin_autorizacion_va_a_revision(self):
         self.cn.execute("UPDATE usuarios SET autorizacion_activa = 0 WHERE id = ?", (self.ids["vis"],)); self.cn.commit()

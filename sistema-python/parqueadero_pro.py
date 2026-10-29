@@ -536,6 +536,8 @@ class AppAccesoVehicularFinal(ctk.CTk):
                       hover_color="#5C4A06", command=self.validar_manual).pack(side="left", padx=4, pady=8)
         self.sw_contingencia = ctk.CTkSwitch(frame_manual, text="Contingencia", command=self.toggle_contingencia)
         self.sw_contingencia.pack(side="left", padx=10, pady=8)
+        ctk.CTkButton(frame_right, text="🚨 Reportar novedad (robo, sospecha, falla)", height=30, fg_color="#7B241C",
+                      hover_color="#5B1B15", command=self.reportar_novedad).pack(padx=20, pady=(0, 6))
         self.lbl_contingencia = ctk.CTkLabel(frame_right, text="", text_color="#F39C12", font=("Arial", 12, "bold"))
         self.lbl_contingencia.pack()
         cn = nucleo.conectar(DB_FILE)
@@ -815,6 +817,39 @@ class AppAccesoVehicularFinal(ctk.CTk):
         self.entry_manual.delete(0, "end")
         self._resolver_acceso((u["id"], u["nombre"], u["apellido"], u["parqueadero"], u["placa"]), modo, None, "manual")
 
+    def reportar_novedad(self):
+        """Ventana para dejar constancia de algo anormal (intento de robo, suplantación, falla de equipo...)."""
+        win = ctk.CTkToplevel(self)
+        win.title("Reportar novedad")
+        win.geometry("420x330")
+        win.grab_set()
+        ctk.CTkLabel(win, text="Tipo de novedad", font=("Arial", 12, "bold")).pack(anchor="w", padx=20, pady=(15, 2))
+        combo = ctk.CTkOptionMenu(win, values=list(nucleo.TIPOS_NOVEDAD), width=380)
+        combo.pack(padx=20)
+        ctk.CTkLabel(win, text="Placa involucrada (opcional)", font=("Arial", 12, "bold")).pack(anchor="w", padx=20, pady=(10, 2))
+        e_placa = ctk.CTkEntry(win, width=380)
+        e_placa.pack(padx=20)
+        ctk.CTkLabel(win, text="¿Qué ocurrió?", font=("Arial", 12, "bold")).pack(anchor="w", padx=20, pady=(10, 2))
+        e_desc = ctk.CTkEntry(win, width=380, height=60)
+        e_desc.pack(padx=20)
+        lbl = ctk.CTkLabel(win, text="")
+        lbl.pack(pady=4)
+
+        def guardar():
+            cn = nucleo.conectar(DB_FILE)
+            try:
+                admin = nucleo.leer_config(cn, "admin_user", "admin")
+                nucleo.registrar_novedad(cn, combo.get(), e_desc.get(), e_placa.get(), registrado_por=f"Guardia · {admin}")
+            except ValueError as e:
+                lbl.configure(text=f"⚠️ {e}", text_color="#E74C3C")
+                return
+            finally:
+                cn.close()
+            self.log(f"🚨 Novedad registrada: {combo.get()}. Si hay peligro, llame a la policía.")
+            win.destroy()
+
+        ctk.CTkButton(win, text="Guardar novedad", command=guardar).pack(pady=8)
+
     def toggle_contingencia(self):
         """Activa o desactiva el modo de contingencia y deja constancia en la consola."""
         activa = bool(self.sw_contingencia.get())
@@ -846,11 +881,20 @@ class AppAccesoVehicularFinal(ctk.CTk):
                 nucleo.REVISAR,
                 f"La placa leída ({placa_leida.upper()}) no coincide con la registrada ({placa or 'sin placa'}).",
                 decision.categoria)
+        if nucleo.contingencia_activa(cn) and decision.resultado == nucleo.AUTORIZADO:
+            # Sin energía principal el sistema no decide solo: el guarda confirma cada caso (como en el simulador).
+            decision = nucleo.Decision(
+                nucleo.REVISAR, "Contingencia: confirme la identidad de la persona (documento y placa a la vista).",
+                decision.categoria, decision.puesto)
         if decision.resultado == nucleo.REVISAR:
             # Caso dudoso: el sistema nunca lo decide solo; lo decide el guarda.
+            fila_u = cn.execute("SELECT rol, autorizado_por FROM usuarios WHERE id = ?", (uid,)).fetchone()
+            cito = ""
+            if fila_u and fila_u["rol"] == "visitante" and (fila_u["autorizado_por"] or "").strip():
+                cito = f"\n\nCitófono: llame a «{fila_u['autorizado_por']}» para confirmar la visita."
             permitir = messagebox.askyesno(
                 "Revisión del guarda",
-                f"{nombre_completo}\n{decision.motivo}\n\n¿Permitir el movimiento de todos modos?"
+                f"{nombre_completo}\n{decision.motivo}{cito}\n\n¿Permitir el movimiento de todos modos?"
             )
             if permitir:
                 decision = nucleo.evaluar_acceso(cn, uid, modo, forzar=True)
@@ -1745,7 +1789,7 @@ class AppAccesoVehicularFinal(ctk.CTk):
         cats = ", ".join(f"{k}: {v}" for k, v in r["por_categoria"].items()) or "sin movimientos"
         self.lbl_reporte.configure(
             text=(f"Movimientos: {r['total']} · Entradas: {r['entradas']} · Salidas: {r['salidas']} · "
-                  f"Denegados: {r['denegados']} · Permitidos por el guarda: {r['permitidos_por_guarda']}\n"
+                  f"Denegados: {r['denegados']} · Permitidos por el guarda: {r['permitidos_por_guarda']} · Novedades: {r['novedades']}\n"
                   f"Por categoría → {cats} · Visitantes libres ahora: {r['visitantes_libres']}/{r['cupo_visitantes']}"),
             text_color="#E0E0E0")
 
@@ -1762,7 +1806,14 @@ class AppAccesoVehicularFinal(ctk.CTk):
             return
         finally:
             cn.close()
-        self.lbl_reporte.configure(text=f"✅ {n} movimientos guardados en: {ruta}", text_color="#2ECC71")
+        ruta_nov = carpeta / (ruta.stem.replace("historial", "novedades") + ".csv")
+        cn = nucleo.conectar(DB_FILE)
+        try:
+            n_nov = nucleo.exportar_novedades_csv(cn, ruta_nov, self.entry_desde.get(), self.entry_hasta.get())
+        finally:
+            cn.close()
+        extra = f" y {n_nov} novedades en: {ruta_nov}" if n_nov else ""
+        self.lbl_reporte.configure(text=f"✅ {n} movimientos guardados en: {ruta}{extra}", text_color="#2ECC71")
 
     def actualizar_tabla_estado(self):
         """

@@ -87,5 +87,29 @@ class TestReportes(Base):
             self.assertFalse(ruta.exists())
 
 
+class TestNovedades(Base):
+    def test_registrar_y_listar_por_fecha(self):
+        n.registrar_novedad(self.conn, "Intento de robo", "Sacó una llave y quiso forzar la pluma", "abc-123",
+                            ahora=datetime.datetime(2026, 11, 2, 22, 0))
+        n.registrar_novedad(self.conn, "Falla de equipo", "La cámara se apagó", ahora=datetime.datetime(2026, 11, 9, 8, 0))
+        self.assertEqual(len(n.listar_novedades(self.conn)), 2)
+        solo = n.listar_novedades(self.conn, "2026-11-01", "2026-11-05")
+        self.assertEqual(len(solo), 1); self.assertEqual(solo[0]["placa"], "ABC123")
+        self.assertEqual(n.resumen_periodo(self.conn, "2026-11-01", "2026-11-05")["novedades"], 1)
+
+    def test_validaciones(self):
+        with self.assertRaises(ValueError):
+            n.registrar_novedad(self.conn, "Inventada", "algo")
+        with self.assertRaises(ValueError):
+            n.registrar_novedad(self.conn, "Otra", "   ")
+
+    def test_exportar_novedades(self):
+        n.registrar_novedad(self.conn, "Otra", "Prueba", ahora=datetime.datetime(2026, 11, 2, 9, 0))
+        with tempfile.TemporaryDirectory() as d:
+            ruta = Path(d) / "n.csv"
+            self.assertEqual(n.exportar_novedades_csv(self.conn, ruta), 1)
+            self.assertIn("Prueba", ruta.read_text(encoding="utf-8-sig"))
+
+
 if __name__ == "__main__":
     unittest.main()

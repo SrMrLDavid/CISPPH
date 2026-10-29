@@ -11,7 +11,7 @@ Proyecto académico de **Diseño de Software I** (Escuela Tecnológica Instituto
 |---|---|---|
 | [`simulador/`](simulador/) | Simulador 3D en Godot 4.7 (GDScript): garita, barreras, parqueadero, guarda y administración | Pruebas automáticas del núcleo de reglas: 0 fallos. Sonido y equipos físicos sin probar |
 | [`prototipo-arduino/`](prototipo-arduino/) | Núcleo de reglas en C++ (`cispph_core.h`), sketch de Arduino UNO y pruebas en PC | Reglas: 23 pruebas, 0 fallos. Sketch ejecutado en simulación de PC; **sin probar en hardware ni compilado con la cadena de Arduino** |
-| [`sistema-python/`](sistema-python/) | Programa de escritorio (CustomTkinter + OpenCV + face_recognition + SQLite) con reglas separadas en `nucleo.py` y puente opcional con Arduino | Reglas y puente con Arduino: 52 pruebas, 0 fallos. **Ventana, cámara, reconocimiento facial y Arduino físico sin probar** |
+| [`sistema-python/`](sistema-python/) | Programa de escritorio (CustomTkinter + OpenCV + face_recognition + SQLite) con reglas separadas en `nucleo.py` y puente opcional con Arduino | Reglas y puente con Arduino: 57 pruebas, 0 fallos. **Ventana, cámara, reconocimiento facial y Arduino físico sin probar** |
 | [`web/`](web/index.html) | Página del proyecto (cómo funciona, simulador 2D ligero con las reglas del de Godot, documentos). Un solo archivo HTML, copia en `docs/index.html` para GitHub Pages | Probada con un guion automático de 40 casos; GitHub Pages sin activar |
 | [`docs/documentos/`](docs/documentos/) | Documentos del proyecto en formato APA 7 (.docx / .xlsx) | Versión 2.1 |
 | [`docs/uml/`](docs/uml/) | Fuentes PlantUML y imágenes de los diagramas | Generados con PlantUML |
@@ -70,7 +70,7 @@ Autonomía de la UPS: `horas ≈ (Wh de la batería × eficiencia) ÷ consumo en
 |---|---|---|
 | Para qué | Demostrar todo el flujo sin hardware | Operar con cámara y rostros reales |
 | Reglas | Autoload `Sistema` | `nucleo.py` |
-| Pruebas | 0 fallos | 52 pruebas, 0 fallos |
+| Pruebas | 0 fallos | 57 pruebas, 0 fallos |
 
 ## Simulador (Godot)
 
