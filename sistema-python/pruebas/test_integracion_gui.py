@@ -49,6 +49,7 @@ class TestFlujoReconocimiento(unittest.TestCase):
         self.app.porteria = Porteria(self.app.puente)
         self.app.lector_placas = None
         self.app.entry_placa = mock.MagicMock(); self.app.entry_placa.get.return_value = ""
+        self.app.entry_manual = mock.MagicMock(); self.app.entry_manual.get.return_value = ""
         for nombre in ("log", "set_estado", "mostrar_popup_bienvenida", "actualizar_tabla_estado", "after", "_denegar"):
             setattr(self.app, nombre, mock.MagicMock())
 
@@ -116,6 +117,46 @@ class TestFlujoReconocimiento(unittest.TestCase):
         pp.messagebox.askyesno.return_value = True
         self.reconocer("V", "Entrada")
         self.assertEqual(self.estados(), ["Denegado", "Entrada"])
+
+    # --- ingreso manual (sin cámara)
+    def manual(self, texto, modo="Entrada"):
+        self.app.entry_manual.get.return_value = texto
+        self.app.combo_modo.get.return_value = modo
+        self.app._denegar.reset_mock(); self.app.puente.reset_mock()
+        self.app.validar_manual()
+
+    def test_manual_por_cedula_abre_la_pluma_y_queda_marcado(self):
+        self.manual("res")
+        self.app.puente.abrir.assert_called_once(); self.app._denegar.assert_not_called()
+        fila = self.cn.execute("SELECT estado, detalle, registrado_por FROM entrada_salida").fetchone()
+        self.assertEqual(fila["estado"], "Entrada"); self.assertIn("ingreso manual", fila["detalle"])
+        self.assertIn("Guardia", fila["registrado_por"])
+
+    def test_manual_por_placa_con_otro_formato(self):
+        self.manual("vis-111")
+        self.assertEqual(self.estados(), ["Entrada"])
+
+    def test_manual_aplica_las_mismas_reglas_doble_entrada(self):
+        self.manual("res"); self.manual("res")
+        self.app._denegar.assert_called_once(); self.assertEqual(self.estados(), ["Entrada", "Denegado"])
+
+    def test_manual_persona_inexistente_cuenta_como_intento_fallido(self):
+        for _ in range(3):
+            self.manual("no-existe")
+        self.manual("res")
+        self.assertIn("bloqueado", self.app._denegar.call_args[0][0].lower())
+        self.assertEqual(self.estados(), [])
+
+    def test_manual_en_contingencia_se_anota(self):
+        nucleo.fijar_contingencia(self.cn, True)
+        self.manual("res")
+        self.assertIn("contingencia", self.cn.execute("SELECT detalle FROM entrada_salida").fetchone()["detalle"])
+
+    def test_manual_visitante_sin_autorizacion_va_a_revision(self):
+        self.cn.execute("UPDATE usuarios SET autorizacion_activa = 0 WHERE id = ?", (self.ids["vis"],)); self.cn.commit()
+        pp.messagebox.askyesno.return_value = False
+        self.manual("vis")
+        self.assertEqual(self.estados(), ["Denegado"])
 
 
 if __name__ == "__main__":

@@ -295,3 +295,96 @@ def registrar_usuario(conn: sqlite3.Connection, **d) -> int:
          1 if (rol == "visitante" and d.get("autorizacion_activa", True)) else 0, ahora, "REGISTRO", ahora))
     conn.commit()
     return cur.lastrowid
+
+
+# ----------------------------------------------------------------------------- búsqueda manual
+def buscar_usuario(conn: sqlite3.Connection, texto: str):
+    """Busca a una persona por cédula o por placa (ignora mayúsculas, espacios y guiones).
+
+    Sirve para el ingreso manual del guarda cuando la cámara no está disponible. Devuelve la fila o None."""
+    texto = (texto or "").strip()
+    if not texto:
+        return None
+    fila = conn.execute("SELECT * FROM usuarios WHERE cedula = ?", (texto,)).fetchone()
+    if fila:
+        return fila
+    buscada = normalizar_placa(texto)
+    for u in conn.execute("SELECT * FROM usuarios"):
+        if normalizar_placa(u["placa"]) == buscada:
+            return u
+    return None
+
+
+# ----------------------------------------------------------------------------- contingencia
+def contingencia_activa(conn: sqlite3.Connection) -> bool:
+    """True si el guarda activó el modo de contingencia (sin cámara o sin energía principal)."""
+    return leer_config(conn, "contingencia", "0") == "1"
+
+
+def fijar_contingencia(conn: sqlite3.Connection, activa: bool) -> None:
+    conn.execute("INSERT OR REPLACE INTO config (clave, valor) VALUES ('contingencia', ?)", ("1" if activa else "0",))
+    conn.commit()
+
+
+# ----------------------------------------------------------------------------- historial y reportes
+def rango_fechas(desde: str = "", hasta: str = "") -> tuple:
+    """Convierte dos fechas AAAA-MM-DD (o vacías) en el rango completo 'AAAA-MM-DD 00:00:00' a '... 23:59:59'.
+
+    Una fecha vacía deja ese extremo abierto. Lanza ValueError si el formato es incorrecto o si
+    «desde» es posterior a «hasta»."""
+    def _fecha(t):
+        t = (t or "").strip()
+        if not t:
+            return None
+        try:
+            return datetime.datetime.strptime(t, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError(f"Fecha inválida «{t}». Use el formato AAAA-MM-DD, por ejemplo 2026-11-05.")
+    d, h = _fecha(desde), _fecha(hasta)
+    if d and h and d > h:
+        raise ValueError("La fecha inicial es posterior a la final.")
+    return (d.strftime("%Y-%m-%d 00:00:00") if d else "", h.strftime("%Y-%m-%d 23:59:59") if h else "")
+
+
+def historial(conn: sqlite3.Connection, desde: str = "", hasta: str = "") -> list:
+    """Movimientos del rango (fechas AAAA-MM-DD, ambas opcionales), del más antiguo al más reciente."""
+    ini, fin = rango_fechas(desde, hasta)
+    sql, args = "SELECT * FROM entrada_salida WHERE 1=1", []
+    if ini:
+        sql += " AND fecha >= ?"; args.append(ini)
+    if fin:
+        sql += " AND fecha <= ?"; args.append(fin)
+    return conn.execute(sql + " ORDER BY id", args).fetchall()
+
+
+def exportar_historial_csv(conn: sqlite3.Connection, ruta, desde: str = "", hasta: str = "") -> int:
+    """Guarda el historial del rango en un archivo CSV que abre Excel. Devuelve cuántas filas escribió."""
+    import csv
+    filas = historial(conn, desde, hasta)
+    columnas = ["fecha", "estado", "nombre_usuario", "placa", "categoria", "puesto", "detalle", "registrado_por"]
+    with open(ruta, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.writer(f, delimiter=";")
+        w.writerow(["Fecha y hora", "Movimiento", "Persona", "Placa", "Categoría", "Puesto", "Detalle", "Registrado por"])
+        for fila in filas:
+            w.writerow([fila[c] if fila[c] is not None else "" for c in columnas])
+    return len(filas)
+
+
+def resumen_periodo(conn: sqlite3.Connection, desde: str = "", hasta: str = "") -> dict:
+    """Cuenta entradas, salidas y denegados del rango, y los casos que el guarda permitió tras una revisión."""
+    filas = historial(conn, desde, hasta)
+    r = {"entradas": 0, "salidas": 0, "denegados": 0, "permitidos_por_guarda": 0, "por_categoria": {},
+         "visitantes_libres": visitantes_libres(conn), "cupo_visitantes": cupo_visitantes(conn)}
+    for f in filas:
+        if f["estado"] == "Entrada":
+            r["entradas"] += 1
+        elif f["estado"] == "Salida":
+            r["salidas"] += 1
+        else:
+            r["denegados"] += 1
+        if "permitido por el guarda" in (f["detalle"] or ""):
+            r["permitidos_por_guarda"] += 1
+        cat = f["categoria"] or "Sin categoría"
+        r["por_categoria"][cat] = r["por_categoria"].get(cat, 0) + 1
+    r["total"] = len(filas)
+    return r

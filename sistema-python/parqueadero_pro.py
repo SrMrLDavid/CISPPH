@@ -66,8 +66,14 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image
-import face_recognition
-import numpy as np
+try:
+    import face_recognition
+    import numpy as np
+    HAY_ROSTROS = True
+except Exception:                       # si dlib no se pudo instalar, el programa abre igual y se opera en modo manual
+    face_recognition = None
+    np = None
+    HAY_ROSTROS = False
 
 from placa_ocr import LectorPlacas      # lectura automática de placas (EasyOCR o Tesseract, opcional)
 from porteria import Porteria       # pluma y pantalla de la portería (virtuales, con Arduino opcional)
@@ -518,7 +524,25 @@ class AppAccesoVehicularFinal(ctk.CTk):
             font=("Arial", 13, "bold"),
             command=self.ejecutar_reconocimiento
         )
-        self.btn_validar.pack(padx=20, pady=20)
+        self.btn_validar.pack(padx=20, pady=(20, 6))
+
+        # Ingreso manual (sin cámara) y modo de contingencia
+        frame_manual = ctk.CTkFrame(frame_right, fg_color="#2D2D2D", corner_radius=8)
+        frame_manual.pack(padx=20, pady=(0, 10), fill="x")
+        self.entry_manual = ctk.CTkEntry(
+            frame_manual, width=230, height=32, placeholder_text="Cédula o placa (ingreso manual)")
+        self.entry_manual.pack(side="left", padx=(10, 6), pady=8)
+        ctk.CTkButton(frame_manual, text="Validar manual", width=110, height=32, fg_color="#7D6608",
+                      hover_color="#5C4A06", command=self.validar_manual).pack(side="left", padx=4, pady=8)
+        self.sw_contingencia = ctk.CTkSwitch(frame_manual, text="Contingencia", command=self.toggle_contingencia)
+        self.sw_contingencia.pack(side="left", padx=10, pady=8)
+        self.lbl_contingencia = ctk.CTkLabel(frame_right, text="", text_color="#F39C12", font=("Arial", 12, "bold"))
+        self.lbl_contingencia.pack()
+        cn = nucleo.conectar(DB_FILE)
+        if nucleo.contingencia_activa(cn):
+            self.sw_contingencia.select()
+            self.lbl_contingencia.configure(text="CONTINGENCIA ACTIVA")
+        cn.close()
 
         # Contenedor visual del estado del sistema
         self.frame_estado = ctk.CTkFrame(
@@ -713,6 +737,10 @@ class AppAccesoVehicularFinal(ctk.CTk):
             self._denegar(f"Lector bloqueado por intentos fallidos. Espere {self.intentos.segundos_restantes(ahora_s)} s",
                           "Lector bloqueado")
             return
+        if not HAY_ROSTROS:
+            self.log("⚠️ El reconocimiento facial no está instalado en este equipo. Use «Ingreso manual» (cédula o placa).")
+            play_sound(False)
+            return
         self.log(f"Sensor activado ({modo}). Analizando rostro...")
 
         frame = self.video_worker.get_frame()
@@ -764,6 +792,41 @@ class AppAccesoVehicularFinal(ctk.CTk):
             return
 
         self.intentos.exito()                      # una persona reconocida reinicia el contador
+        self._resolver_acceso(usuario, modo, frame, "rostro")
+
+    def validar_manual(self):
+        """Ingreso manual: el guarda escribe la cédula o la placa y el sistema aplica las mismas reglas.
+
+        Sirve cuando la cámara falla, hay contingencia (sin energía principal) o la persona no tiene rostro registrado."""
+        modo = self.combo_modo.get()
+        ahora_s = time.time()
+        if self.intentos.bloqueado(ahora_s):
+            self._denegar(f"Lector bloqueado por intentos fallidos. Espere {self.intentos.segundos_restantes(ahora_s)} s",
+                          "Lector bloqueado")
+            return
+        texto = self.entry_manual.get().strip()
+        cn = nucleo.conectar(DB_FILE)
+        u = nucleo.buscar_usuario(cn, texto)
+        cn.close()
+        if u is None:
+            self._fallo("No hay nadie registrado con esa cédula o placa")
+            return
+        self.intentos.exito()
+        self.entry_manual.delete(0, "end")
+        self._resolver_acceso((u["id"], u["nombre"], u["apellido"], u["parqueadero"], u["placa"]), modo, None, "manual")
+
+    def toggle_contingencia(self):
+        """Activa o desactiva el modo de contingencia y deja constancia en la consola."""
+        activa = bool(self.sw_contingencia.get())
+        cn = nucleo.conectar(DB_FILE)
+        nucleo.fijar_contingencia(cn, activa)
+        cn.close()
+        self.log("🔶 Modo de contingencia ACTIVADO: operar con ingreso manual; los movimientos quedan marcados."
+                 if activa else "✅ Modo de contingencia desactivado.")
+        self.lbl_contingencia.configure(text="CONTINGENCIA ACTIVA" if activa else "")
+
+    def _resolver_acceso(self, usuario, modo, frame, origen):
+        """Aplica las reglas del conjunto a una persona ya identificada (por rostro o de forma manual) y actúa."""
         uid, nombre, apellido, parqueadero, placa = usuario
         nombre_completo = f"{nombre} {apellido}"
 
@@ -772,7 +835,7 @@ class AppAccesoVehicularFinal(ctk.CTk):
         cn = nucleo.conectar(DB_FILE)
         decision = nucleo.evaluar_acceso(cn, uid, modo)
         placa_leida = self.entry_placa.get().strip()
-        if not placa_leida:
+        if not placa_leida and frame is not None:
             auto = self._leer_placa(frame)           # intenta leerla sola con la cámara
             if auto:
                 placa_leida = auto
@@ -795,7 +858,13 @@ class AppAccesoVehicularFinal(ctk.CTk):
             else:
                 decision = nucleo.Decision(nucleo.DENEGADO, decision.motivo, decision.categoria)
         admin = nucleo.leer_config(cn, "admin_user", "admin")
-        nucleo.registrar_movimiento(cn, uid, modo, decision, registrado_por=f"Guardia · {admin}")
+        notas = []
+        if origen == "manual":
+            notas.append("ingreso manual")
+        if nucleo.contingencia_activa(cn):
+            notas.append("contingencia")
+        detalle = decision.motivo + (f" [{', '.join(notas)}]" if notas else "")
+        nucleo.registrar_movimiento(cn, uid, modo, decision, registrado_por=f"Guardia · {admin}", detalle=detalle)
         libres = nucleo.visitantes_libres(cn)
         cupo = nucleo.cupo_visitantes(cn)
         cn.close()
@@ -1125,6 +1194,10 @@ class AppAccesoVehicularFinal(ctk.CTk):
             )
             return
 
+        if not HAY_ROSTROS:                       # sin reconocimiento facial: se registra sin fotos
+            self._registrar_sin_rostro(datos, tipo, rol)
+            return
+
         self.abrir_popup_captura(
             datos["nombre"],
             datos["apellido"],
@@ -1133,6 +1206,25 @@ class AppAccesoVehicularFinal(ctk.CTk):
             datos["parqueadero"],
             datos["placa"]
         )
+
+    def _registrar_sin_rostro(self, datos, tipo, rol):
+        """Registra a la persona sin fotos (cuando el reconocimiento facial no está instalado).
+        Se identificará por cédula o placa con el ingreso manual."""
+        cn = nucleo.conectar(DB_FILE)
+        try:
+            nucleo.registrar_usuario(
+                cn, nombre=datos["nombre"], apellido=datos["apellido"], tipo_id=tipo, cedula=datos["cedula"],
+                parqueadero=datos["parqueadero"], placa=datos["placa"], rol=rol, vip=bool(self.chk_vip.get()),
+                turno=self.combo_turno.get(), autorizado_por=self.entry_autoriza.get().strip())
+        except ValueError as e:
+            self.lbl_status_reg.configure(text=f"⚠️ {e}", text_color="#E74C3C")
+            return
+        finally:
+            cn.close()
+        self.actualizar_tabla_consultar()
+        self.actualizar_lista_actualizar()
+        self.actualizar_tabla_estado()
+        self._popup_exito()
 
     def abrir_popup_captura(self, nombre, apellido, tipo_id, cedula, parqueadero, placa):
         """
@@ -1624,9 +1716,53 @@ class AppAccesoVehicularFinal(ctk.CTk):
             command=self.actualizar_tabla_estado
         ).pack(pady=5)
 
+        # Reportes por rango de fechas (AAAA-MM-DD; vacío = sin límite)
+        barra = ctk.CTkFrame(frame, fg_color="transparent")
+        barra.pack(pady=(0, 5))
+        self.entry_desde = ctk.CTkEntry(barra, width=130, placeholder_text="Desde AAAA-MM-DD")
+        self.entry_desde.pack(side="left", padx=4)
+        self.entry_hasta = ctk.CTkEntry(barra, width=130, placeholder_text="Hasta AAAA-MM-DD")
+        self.entry_hasta.pack(side="left", padx=4)
+        ctk.CTkButton(barra, text="📊 Resumen", width=100, command=self.mostrar_resumen).pack(side="left", padx=4)
+        ctk.CTkButton(barra, text="💾 Exportar CSV", width=120, command=self.exportar_historial).pack(side="left", padx=4)
+        self.lbl_reporte = ctk.CTkLabel(frame, text="", text_color="#AAAAAA", justify="left")
+        self.lbl_reporte.pack(pady=(0, 5))
+
         self.scroll_estado = ctk.CTkScrollableFrame(frame, fg_color="#121212")
         self.scroll_estado.pack(padx=10, pady=10, fill="both", expand=True)
         self.actualizar_tabla_estado()
+
+    def mostrar_resumen(self):
+        """Muestra cuántas entradas, salidas y denegados hubo en el rango de fechas elegido."""
+        cn = nucleo.conectar(DB_FILE)
+        try:
+            r = nucleo.resumen_periodo(cn, self.entry_desde.get(), self.entry_hasta.get())
+        except ValueError as e:
+            self.lbl_reporte.configure(text=f"⚠️ {e}", text_color="#E74C3C")
+            return
+        finally:
+            cn.close()
+        cats = ", ".join(f"{k}: {v}" for k, v in r["por_categoria"].items()) or "sin movimientos"
+        self.lbl_reporte.configure(
+            text=(f"Movimientos: {r['total']} · Entradas: {r['entradas']} · Salidas: {r['salidas']} · "
+                  f"Denegados: {r['denegados']} · Permitidos por el guarda: {r['permitidos_por_guarda']}\n"
+                  f"Por categoría → {cats} · Visitantes libres ahora: {r['visitantes_libres']}/{r['cupo_visitantes']}"),
+            text_color="#E0E0E0")
+
+    def exportar_historial(self):
+        """Guarda el historial del rango elegido en un CSV dentro de la carpeta «reportes»."""
+        carpeta = BASE_DIR / "reportes"
+        carpeta.mkdir(exist_ok=True)
+        ruta = carpeta / f"historial_{datetime.datetime.now():%Y%m%d_%H%M%S}.csv"
+        cn = nucleo.conectar(DB_FILE)
+        try:
+            n = nucleo.exportar_historial_csv(cn, ruta, self.entry_desde.get(), self.entry_hasta.get())
+        except ValueError as e:
+            self.lbl_reporte.configure(text=f"⚠️ {e}", text_color="#E74C3C")
+            return
+        finally:
+            cn.close()
+        self.lbl_reporte.configure(text=f"✅ {n} movimientos guardados en: {ruta}", text_color="#2ECC71")
 
     def actualizar_tabla_estado(self):
         """
