@@ -466,6 +466,82 @@ func estadisticas() -> Dictionary:
 	}
 
 
+# --- reportes por rango de fechas -------------------------------------------------------------
+
+# Convierte "AAAA-MM-DD" (o vacio) en un limite de texto comparable con la fecha de cada movimiento.
+# Devuelve {"ok": bool, "ini": String, "fin": String, "error": String}. Vacio = sin limite.
+func rango_fechas(desde: String, hasta: String) -> Dictionary:
+	var ini: String = ""
+	var fin: String = ""
+	for par in [["desde", desde.strip_edges()], ["hasta", hasta.strip_edges()]]:
+		var t: String = str(par[1])
+		if t == "":
+			continue
+		var p: PackedStringArray = t.split("-")
+		var valida: bool = p.size() == 3 and p[0].length() == 4 and p[1].length() == 2 and p[2].length() == 2 \
+			and p[0].is_valid_int() and p[1].is_valid_int() and p[2].is_valid_int()
+		if valida:
+			var mes: int = int(p[1])
+			var dia: int = int(p[2])
+			valida = mes >= 1 and mes <= 12 and dia >= 1 and dia <= 31
+		if not valida:
+			return {"ok": false, "ini": "", "fin": "", "error": "Fecha inválida «%s». Use AAAA-MM-DD, por ejemplo 2026-11-05." % t}
+		if str(par[0]) == "desde":
+			ini = t + " 00:00:00"
+		else:
+			fin = t + " 23:59:59"
+	if ini != "" and fin != "" and ini > fin:
+		return {"ok": false, "ini": "", "fin": "", "error": "La fecha inicial es posterior a la final."}
+	return {"ok": true, "ini": ini, "fin": fin, "error": ""}
+
+
+# Movimientos cuyo texto de fecha cae en el rango (del mas antiguo al mas reciente).
+func movimientos_en_rango(desde: String, hasta: String) -> Array:
+	var r: Dictionary = rango_fechas(desde, hasta)
+	var res: Array = []
+	if not bool(r["ok"]):
+		return res
+	for m in movimientos:
+		var f: String = str((m as Dictionary).get("fecha", ""))
+		if str(r["ini"]) != "" and f < str(r["ini"]):
+			continue
+		if str(r["fin"]) != "" and f > str(r["fin"]):
+			continue
+		res.append(m)
+	return res
+
+
+func _celda_csv(v: Variant) -> String:
+	return "\"" + str(v).replace("\"", "'").replace("\n", " ") + "\""
+
+
+# Guarda el historial del rango en un CSV (separado por ; y con BOM para que Excel lea las tildes).
+# Devuelve {"ok", "ruta", "filas", "error"}. Si ruta_destino esta vacia usa user://reportes/.
+func exportar_historial_csv(desde: String, hasta: String, ruta_destino: String = "") -> Dictionary:
+	var r: Dictionary = rango_fechas(desde, hasta)
+	if not bool(r["ok"]):
+		return {"ok": false, "ruta": "", "filas": 0, "error": str(r["error"])}
+	var filas: Array = movimientos_en_rango(desde, hasta)
+	var ruta: String = ruta_destino
+	if ruta == "":
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://reportes"))
+		ruta = "user://reportes/historial_%s.csv" % Time.get_datetime_string_from_system().replace(":", "").replace("-", "").replace("T", "_")
+	var f := FileAccess.open(ruta, FileAccess.WRITE)
+	if f == null:
+		return {"ok": false, "ruta": ruta, "filas": 0, "error": "No se pudo crear el archivo."}
+	f.store_buffer(PackedByteArray([0xEF, 0xBB, 0xBF]))
+	f.store_line(";".join(PackedStringArray(["Fecha y hora", "Movimiento", "Persona", "Placa", "Clasificación", "Categoría", "Puesto", "Detalle", "Registrado por"])))
+	for m in filas:
+		var d: Dictionary = m
+		var cols: Array = [d.get("fecha", ""), d.get("estado", ""), d.get("nombre", ""), d.get("placa", ""), d.get("clasificacion", ""), d.get("categoria", ""), d.get("puesto", ""), d.get("detalle", ""), d.get("registrado_por", "")]
+		var textos: PackedStringArray = PackedStringArray()
+		for c in cols:
+			textos.append(_celda_csv(c))
+		f.store_line(";".join(textos))
+	f.close()
+	return {"ok": true, "ruta": ruta, "filas": filas.size(), "error": ""}
+
+
 # --- datos de prueba (los de la bitacora del equipo + algunos mas) ------------------------------
 
 func cargar_datos_iniciales() -> void:

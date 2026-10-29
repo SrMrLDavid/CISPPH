@@ -475,7 +475,7 @@ func crear_tarjeta(sentido: String) -> Control:
 	t["b_permitir"] = boton("Permitir", func() -> void: principal.permitir(sentido))
 	t["b_denegar"] = boton("Denegar", func() -> void: principal.denegar(sentido))
 	t["b_citofono"] = boton("Citófono", func() -> void:
-		if principal.apagon:
+		if principal.sin_sistema():
 			principal.preguntar(sentido)
 		else:
 			principal.citofono(sentido))
@@ -584,7 +584,7 @@ func refrescar_carril(sentido: String) -> void:
 	(t["b_denegar"] as Button).disabled = not esperando
 	(t["b_citofono"] as Button).disabled = not (esperando and not cito.is_empty()) or bool(L["citofono_visto"])
 	(t["b_citofono"] as Button).text = "Citófono"
-	if principal.apagon:
+	if principal.sin_sistema():
 		(t["b_citofono"] as Button).text = "🗣 Preguntar"
 		(t["b_citofono"] as Button).disabled = not esperando or L.has("pregunta")
 		(t["reg_caja"] as Control).visible = false
@@ -595,9 +595,9 @@ func refrescar_carril(sentido: String) -> void:
 			txa += "\nDice ser: %s %s (%s)" % [str(cond["nombre"]), str(cond["apellido"]), str(cond["cedula"])]
 		txa += "\nSin base de datos."
 		(t["info"] as Label).text = txa
-		banner.text = "SISTEMA CAÍDO — decide tú"
+		banner.text = "SISTEMA CAÍDO — decide tú" if principal.apagon else "A MANO (sin el sistema) — decide tú"
 		banner.add_theme_color_override("font_color", C_AVISO)
-		var dap: String = "Sin energía: no hay verificación del sistema, ni citófono."
+		var dap: String = "Sin energía: no hay verificación del sistema, ni citófono." if principal.apagon else "Sin el sistema: no hay verificación automática ni citófono; usa «Preguntar»."
 		if L.has("pregunta") and float(L["pregunta"]) > 0.0:
 			dap += "\n[esperando confirmación… %d s]" % int(ceil(float(L["pregunta"])))
 		elif str(L.get("pregunta_resp", "")) != "":
@@ -632,6 +632,8 @@ func actualizar_barra() -> void:
 	etiqueta_stats.text += " · Estrés %d%%" % int(estres_valor)
 	if principal.apagon:
 		etiqueta_stats.text += " · ⚡ SIN ENERGÍA"
+	elif principal.a_mano:
+		etiqueta_stats.text += " · ✋ A MANO"
 	if principal.decisiones > 0:
 		etiqueta_stats.text += " · Aciertos %d/%d" % [principal.aciertos, principal.decisiones]
 	var i: int = 0 if str(Sistema.config.get("modo", "automatico")) == "automatico" else 1
@@ -1129,9 +1131,9 @@ func llenar_inspeccion(sentido: String) -> void:
 	# banner
 	var res: String = str(info["resultado"])
 	var banner := etiqueta("", 16)
-	var ap: bool = principal.apagon
+	var ap: bool = principal.sin_sistema()
 	if ap:
-		banner.text = "SISTEMA CAÍDO: sin base de datos ni citófono. Decide con lo que ves; si dudas, envía a preguntar."
+		banner.text = ("TRABAJANDO A MANO: sin el sistema. Decide con lo que ves; si dudas, envía a preguntar." if principal.a_mano and not principal.apagon else "SISTEMA CAÍDO: sin base de datos ni citófono. Decide con lo que ves; si dudas, envía a preguntar.")
 		banner.add_theme_color_override("font_color", C_AVISO)
 	elif res == "autorizado":
 		banner.text = "El sistema propone: AUTORIZADO"
@@ -1238,7 +1240,7 @@ func llenar_inspeccion(sentido: String) -> void:
 	acc.add_child(bt)
 	var cito: Dictionary = caso["citofono"]
 	var b_cito := boton("📞 Llamar por citófono", func() -> void:
-		if principal.apagon:
+		if principal.sin_sistema():
 			principal.preguntar(sentido)
 		else:
 			principal.citofono(sentido))
@@ -1279,6 +1281,14 @@ func abrir_historial() -> void:
 	barra.add_child(buscar)
 	var contador := etiqueta("", 13, C_SUAVE)
 	barra.add_child(contador)
+	var barra2 := HBoxContainer.new()
+	v.add_child(barra2)
+	var f_desde := campo("Desde AAAA-MM-DD", 160)
+	var f_hasta := campo("Hasta AAAA-MM-DD", 160)
+	barra2.add_child(etiqueta("Fechas: ", 13, C_SUAVE))
+	barra2.add_child(f_desde)
+	barra2.add_child(f_hasta)
+	var aviso_rep := etiqueta("", 13, C_SUAVE)
 	var arbol := Tree.new()
 	arbol.columns = 11
 	arbol.column_titles_visible = true
@@ -1303,8 +1313,14 @@ func abrir_historial() -> void:
 		var q: String = buscar.text.strip_edges().to_lower()
 		var f: String = filtro.get_item_text(filtro.selected)
 		var n: int = 0
-		for i in range(Sistema.movimientos.size() - 1, -1, -1):
-			var m: Dictionary = Sistema.movimientos[i]
+		var en_rango: Array = Sistema.movimientos_en_rango(f_desde.text, f_hasta.text)
+		if not bool(Sistema.rango_fechas(f_desde.text, f_hasta.text)["ok"]):
+			en_rango = Sistema.movimientos
+			aviso_rep.text = "  " + str(Sistema.rango_fechas(f_desde.text, f_hasta.text)["error"])
+		else:
+			aviso_rep.text = ""
+		for i in range(en_rango.size() - 1, -1, -1):
+			var m: Dictionary = en_rango[i]
 			if f != "Todos" and str(m["estado"]) != f:
 				continue
 			var pajar: String = ("%s %s %s %s" % [m["nombre"], m["placa"], m["puesto"], m["detalle"]]).to_lower()
@@ -1324,6 +1340,21 @@ func abrir_historial() -> void:
 		contador.text = "  %d registros mostrados (de %d)" % [n, Sistema.movimientos.size()]
 	filtro.item_selected.connect(llenar)
 	buscar.text_changed.connect(llenar)
+	f_desde.text_changed.connect(llenar)
+	f_hasta.text_changed.connect(llenar)
+	barra2.add_child(boton("Exportar CSV (Excel)", func() -> void:
+		var r: Dictionary = Sistema.exportar_historial_csv(f_desde.text, f_hasta.text)
+		if bool(r["ok"]):
+			var real: String = ProjectSettings.globalize_path(str(r["ruta"]))
+			aviso_rep.text = "  ✔ %d movimientos guardados en: %s" % [int(r["filas"]), real]
+			mensaje("Historial exportado (%d movimientos)." % int(r["filas"]), C_OK)
+		else:
+			aviso_rep.text = "  " + str(r["error"])
+			mensaje(str(r["error"]), C_MAL)))
+	barra2.add_child(boton("Abrir carpeta", func() -> void:
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://reportes"))
+		OS.shell_open(ProjectSettings.globalize_path("user://reportes"))))
+	barra2.add_child(aviso_rep)
 	llenar.call()
 	arbol.item_selected.connect(func() -> void:
 		for c in fotos.get_children():
@@ -1430,6 +1461,12 @@ func abrir_config() -> void:
 	apag.button_pressed = principal.apagones_aleatorios
 	apag.toggled.connect(func(b: bool) -> void: principal.apagones_aleatorios = b)
 	fila_form(grid, "Apagones aleatorios (evento de estrés)", apag)
+	var mano := CheckBox.new()
+	mano.button_pressed = principal.a_mano
+	mano.toggled.connect(func(b: bool) -> void:
+		principal.a_mano = b
+		mensaje("Trabajar a mano: " + ("activado (como hoy, sin el sistema)." if b else "desactivado."), C_AVISO))
+	fila_form(grid, "Trabajar a mano, sin el sistema (para comparar con el proceso de hoy)", mano)
 	var fcx := CheckBox.new()
 	fcx.button_pressed = principal.fallas_conexion
 	fcx.toggled.connect(func(b: bool) -> void: principal.fallas_conexion = b)
@@ -1681,6 +1718,27 @@ func _texto_metricas() -> Dictionary:
 		"fallas": fallas, "aciertos": aciertos, "evaluadas": evaluadas, "insp": con_insp}
 
 
+func _comparacion_mano() -> Array:
+	var r: Array = [{"n": 0, "t": 0.0, "ev": 0, "ok": 0}, {"n": 0, "t": 0.0, "ev": 0, "ok": 0}]
+	for m in principal.metricas:
+		if str(m["decision"]) == "no registrada" or str(m["origen"]) != "Guardia":
+			continue
+		var k: int = 1 if bool(m.get("a_mano", false)) else 0
+		(r[k] as Dictionary)["n"] = int((r[k] as Dictionary)["n"]) + 1
+		(r[k] as Dictionary)["t"] = float((r[k] as Dictionary)["t"]) + float(m["segundos"])
+		if str(m["acierto"]) != "":
+			(r[k] as Dictionary)["ev"] = int((r[k] as Dictionary)["ev"]) + 1
+			if str(m["acierto"]) == "sí":
+				(r[k] as Dictionary)["ok"] = int((r[k] as Dictionary)["ok"]) + 1
+	return r
+
+
+func _linea_comparacion(nombre: String, d: Dictionary) -> String:
+	var n: int = int(d["n"])
+	var prom: String = ("%.1f s" % (float(d["t"]) / float(n))) if n > 0 else "—"
+	return "%s: %d decisiones del guardia · tiempo medio %s · aciertos en casos dudosos %d de %d" % [nombre, n, prom, int(d["ok"]), int(d["ev"])]
+
+
 func _tabla_validacion() -> String:
 	var m: Dictionary = _texto_metricas()
 	var fecha: String = Time.get_date_string_from_system()
@@ -1701,6 +1759,14 @@ func abrir_metricas() -> void:
 	v.add_child(etiqueta("Tiempo de decisión: promedio %.1f s · mínimo %.1f s · máximo %.1f s" % [float(m["prom"]), float(m["min"]), float(m["max"])], 13))
 	v.add_child(etiqueta("Casos dudosos evaluados: %d · aciertos del guardia: %d" % [int(m["evaluadas"]), int(m["aciertos"])], 13))
 	v.add_child(etiqueta("Aviso: el tiempo medido incluye lo que tarda la persona en pensar y leer; no es el tiempo de registro del sistema (RNF-003, umbral propuesto ≤ 3 s, sin validar).", 12, C_SUAVE))
+	var cmp: Array = _comparacion_mano()
+	v.add_child(etiqueta("Con y sin el sistema (solo esta sesión)", 14, C_ACENTO))
+	v.add_child(etiqueta(_linea_comparacion("Con el sistema", cmp[0]), 13))
+	v.add_child(etiqueta(_linea_comparacion("A mano (o con apagón)", cmp[1]), 13))
+	var nota_cmp := etiqueta("Son pocos casos de una sola persona: sirve para ilustrar la diferencia entre el proceso de hoy y el propuesto, no demuestra una mejora real. Para probar la forma actual de trabajo active «Trabajar a mano» en Ajustes.", 12, C_SUAVE)
+	nota_cmp.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	nota_cmp.custom_minimum_size.x = 680
+	v.add_child(nota_cmp)
 	v.add_child(HSeparator.new())
 	v.add_child(etiqueta("Borrador para la tabla de validación del prototipo (§11.1 de la guía)", 14, C_ACENTO))
 	var te := TextEdit.new()
@@ -1712,9 +1778,9 @@ func abrir_metricas() -> void:
 	v.add_child(boton("Guardar CSV y Markdown en la carpeta de datos", func() -> void:
 		var f := FileAccess.open("user://metricas_sesion.csv", FileAccess.WRITE)
 		if f != null:
-			f.store_line("fecha,sentido,categoria,caso,decision,origen,segundos,uso_inspeccion,acierto")
+			f.store_line("fecha,sentido,categoria,caso,decision,origen,segundos,uso_inspeccion,acierto,a_mano")
 			for r in principal.metricas:
-				f.store_line("%s,%s,%s,\"%s\",%s,%s,%s,%s,%s" % [r["fecha"], r["sentido"], r["categoria"], str(r["caso"]).replace("\"", "'"), r["decision"], r["origen"], r["segundos"], r["inspeccion"], r["acierto"]])
+				f.store_line("%s,%s,%s,\"%s\",%s,%s,%s,%s,%s,%s" % [r["fecha"], r["sentido"], r["categoria"], str(r["caso"]).replace("\"", "'"), r["decision"], r["origen"], r["segundos"], r["inspeccion"], r["acierto"], r.get("a_mano", false)])
 			f.close()
 		var g := FileAccess.open("user://registro_validacion.md", FileAccess.WRITE)
 		if g != null:

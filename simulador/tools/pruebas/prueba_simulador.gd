@@ -362,6 +362,30 @@ func correr() -> void:
 	await get_tree().create_timer(1.0).timeout
 	get_viewport().get_texture().get_image().save_png(dir_cap + "sim_monitor.png")
 	P.ui.cerrar_overlay()
+	# q) trabajar a mano (sin el sistema): como el apagon pero sin oscuridad
+	chk(not P.apagon, "q) sin apagon al empezar")
+	P.a_mano = true
+	chk(P.sin_sistema(), "q) a mano cuenta como sin sistema")
+	var nm0: int = P.metricas.size()
+	P.solicitar("Entrada")
+	chk(await esperar(func() -> bool: return str((P.carriles["Entrada"] as Dictionary).get("estado", "")) == "esperando" and not ((P.carriles["Entrada"] as Dictionary)["eval"] as Dictionary).is_empty(), 90.0), "q) llega un vehiculo a mano")
+	var LM: Dictionary = P.carriles["Entrada"]
+	await get_tree().create_timer(4.5).timeout
+	chk(float(LM["cuenta"]) < 0.0 and str(LM["estado"]) == "esperando", "q) a mano no hay decision automatica")
+	P.citofono("Entrada")
+	chk(not bool(LM["citofono_visto"]), "q) a mano no hay citofono del sistema")
+	chk(P.ui.tarjetas["Entrada"]["banner"].text.begins_with("A MANO"), "q) la tarjeta muestra A MANO")
+	P.preguntar("Entrada")
+	chk(LM.has("pregunta") and float(LM["pregunta"]) > 0.0, "q) enviar a preguntar funciona a mano")
+	P.denegar("Entrada", "Guardia", "")
+	chk(P.metricas.size() == nm0 + 1 and bool(P.metricas[P.metricas.size() - 1]["a_mano"]) and str(P.metricas[P.metricas.size() - 1]["acierto"]) != "", "q) la decision a mano queda marcada y evaluada")
+	chk(await esperar(func() -> bool: return P.carril_libre("Entrada"), 60.0), "q) el vehiculo se va tras la decision a mano")
+	P.a_mano = false
+	var cmp: Array = P.ui._comparacion_mano()
+	chk(int((cmp[1] as Dictionary)["n"]) >= 1, "q) la comparacion cuenta decisiones a mano")
+	P.ui.abrir_metricas()
+	chk(P.ui.ventanas.has("metricas"), "q) la ventana de metricas muestra la comparacion")
+	P.ui.cerrar_overlay()
 	# p) v5: metricas, error de conexion, expiracion, categorias
 	chk(P.metricas.size() > 0, "p) se registraron metricas de decision")
 	var n0: int = P.metricas.size()

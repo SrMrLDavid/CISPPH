@@ -31,6 +31,7 @@ var tiempo_ui: float = 0.0
 var iniciado: bool = false
 var filtro: FiltroVHS = null
 var apagon: bool = false
+var a_mano: bool = false                # trabajar como hoy: sin el sistema (sin veredicto ni citofono), decide el guardia
 var fallas_conexion: bool = true      # excepcion del UML: error de conexion ocasional (la operacion no se registra)
 var prob_falla: float = 0.07
 var expira_min: float = 0.0           # 0 = la sesion no expira por inactividad
@@ -339,7 +340,7 @@ func _en_garita(sentido: String) -> void:
 	L["t_listo"] = Time.get_ticks_msec()
 	audio.tocar("ok" if str(ev["resultado"]) == "autorizado" else ("error" if str(ev["resultado"]) == "denegado" else "alerta"))
 	var modo: String = str(Sistema.config.get("modo", "automatico"))
-	if modo == "automatico" and str(ev["resultado"]) != "revisar" and not apagon:
+	if modo == "automatico" and str(ev["resultado"]) != "revisar" and not sin_sistema():
 		L["cuenta"] = float(Sistema.config.get("popup_segundos", 3))
 	ui.refrescar_carril(sentido)
 
@@ -470,7 +471,7 @@ func permitir(sentido: String, origen: String = "Guardia", nota: String = "") ->
 	Sistema.registrar_movimiento(sentido, u, str(caso["placa_delantera"]), "permitido", detalle, puesto, L["fotos"], hora_int(), origen)
 	L["estado"] = "pasando"
 	L["cuenta"] = -1.0
-	if origen == "Guardia" and (str(ev["resultado"]) == "revisar" or apagon):
+	if origen == "Guardia" and (str(ev["resultado"]) == "revisar" or sin_sistema()):
 		retroalimentar(caso, true)
 	elif str(ev["resultado"]) == "autorizado":
 		mover_dinero(PAGO_NORMAL)
@@ -505,7 +506,7 @@ func denegar(sentido: String, origen: String = "Guardia", nota: String = "") -> 
 	detalle += texto_conductor(caso, ev["usuario"])
 	if nota.strip_edges() != "":
 		detalle += " Nota del guardia: " + nota.strip_edges()
-	if origen == "Guardia" and (str(ev["resultado"]) == "revisar" or apagon):
+	if origen == "Guardia" and (str(ev["resultado"]) == "revisar" or sin_sistema()):
 		retroalimentar(caso, false)
 	Sistema.registrar_movimiento(sentido, ev["usuario"], str(caso["placa_delantera"]), "denegado", detalle, "", L["fotos"], hora_int(), origen)
 	audio.tocar("error")
@@ -623,12 +624,20 @@ func _retirado(v: Vehiculo3D) -> void:
 		ui.refrescar_carril("Entrada")
 
 
+# True cuando el guardia no tiene el sistema: por un apagon o porque eligio trabajar a mano.
+func sin_sistema() -> bool:
+	return apagon or a_mano
+
+
 func citofono(sentido: String) -> void:
 	var L: Dictionary = carriles[sentido]
 	if L.is_empty() or str(L["estado"]) != "esperando":
 		return
 	if apagon:
 		ui.mensaje("Sin energía: el citófono no funciona. Usa «Enviar a preguntar».", Color("#ffb347"))
+		return
+	if a_mano:
+		ui.mensaje("Trabajando a mano: no hay citófono del sistema. Usa «Enviar a preguntar».", Color("#ffb347"))
 		return
 	L["citofono_visto"] = true
 	L["cuenta"] = -1.0
@@ -639,7 +648,7 @@ func citofono(sentido: String) -> void:
 # Apagon: otro guarda va a preguntar en persona (10 s reales de espera).
 func preguntar(sentido: String) -> void:
 	var L: Dictionary = carriles[sentido]
-	if not apagon or L.is_empty() or str(L["estado"]) != "esperando" or L.has("pregunta"):
+	if not sin_sistema() or L.is_empty() or str(L["estado"]) != "esperando" or L.has("pregunta"):
 		return
 	L["pregunta"] = 10.0
 	L["pregunta_resp"] = ""
@@ -803,7 +812,7 @@ func _process(delta: float) -> void:
 	for k2 in carriles.keys():
 		if not (carriles[k2] as Dictionary).is_empty() and str((carriles[k2] as Dictionary)["estado"]) == "esperando":
 			esperando += 1
-	if apagon:
+	if sin_sistema():
 		estres = minf(100.0, estres + (0.4 + 1.2 * esperando) * dt)
 	else:
 		estres = maxf(0.0, estres - 3.0 * dt)
@@ -821,7 +830,7 @@ func _process(delta: float) -> void:
 		var L: Dictionary = carriles[sentido]
 		if L.is_empty():
 			continue
-		if float(L["cuenta"]) >= 0.0 and str(L["estado"]) == "esperando" and not apagon:
+		if float(L["cuenta"]) >= 0.0 and str(L["estado"]) == "esperando" and not sin_sistema():
 			L["cuenta"] = float(L["cuenta"]) - dt
 			if float(L["cuenta"]) <= 0.0:
 				L["cuenta"] = -1.0
@@ -895,11 +904,11 @@ func _unhandled_key_input(evento: InputEvent) -> void:
 
 # Excepcion de conexion (UML / RNF-005): avisa, no registra la operacion como exitosa y permite reintentar.
 func _falla_conexion() -> bool:
-	if not fallas_conexion or apagon or randf() > prob_falla:
+	if not fallas_conexion or sin_sistema() or randf() > prob_falla:
 		return false
 	ui.mensaje("Error de conexión: la operación NO se registró. Puedes reintentar.", Color("#ff5c5c"))
 	audio.tocar("error")
-	metricas.append({"fecha": Time.get_datetime_string_from_system(), "sentido": "-", "categoria": "-", "caso": "falla de conexión simulada", "decision": "no registrada", "origen": "Guardia", "segundos": 0.0, "inspeccion": false, "acierto": ""})
+	metricas.append({"fecha": Time.get_datetime_string_from_system(), "sentido": "-", "categoria": "-", "caso": "falla de conexión simulada", "decision": "no registrada", "origen": "Guardia", "segundos": 0.0, "inspeccion": false, "acierto": "", "a_mano": a_mano})
 	return true
 
 
@@ -908,12 +917,12 @@ func _anotar_metrica(sentido: String, L: Dictionary, decision: String, origen: S
 	var caso: Dictionary = L["caso"]
 	var u: Dictionary = (L["eval"] as Dictionary).get("usuario", {})
 	var acierto: String = ""
-	var dudoso: bool = str((L["eval"] as Dictionary).get("resultado", "")) == "revisar" or apagon
+	var dudoso: bool = str((L["eval"] as Dictionary).get("resultado", "")) == "revisar" or sin_sistema()
 	if origen == "Guardia" and dudoso:
 		acierto = "sí" if (decision == "permitido") == bool(caso.get("legitimo", true)) else "no"
 	metricas.append({"fecha": Time.get_datetime_string_from_system(), "sentido": sentido, "categoria": Sistema.categoria_de(u),
 		"caso": str(caso.get("escenario", "")), "decision": decision, "origen": origen,
-		"segundos": snappedf(float(Time.get_ticks_msec() - t0) / 1000.0, 0.1), "inspeccion": bool(L.get("uso_inspeccion", false)), "acierto": acierto})
+		"segundos": snappedf(float(Time.get_ticks_msec() - t0) / 1000.0, 0.1), "inspeccion": bool(L.get("uso_inspeccion", false)), "acierto": acierto, "a_mano": sin_sistema()})
 
 
 func limpiar_para_menu() -> void:
