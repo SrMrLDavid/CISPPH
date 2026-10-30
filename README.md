@@ -1,4 +1,4 @@
-# C.I.S.P.P.H. — Control de Ingreso y Salida para Parqueaderos de Propiedad Horizontal
+# C.I.S.P.P.H. — Control de Ingreso y Salida para Parqueaderos de Propiedad Horizontal 
 
 Proyecto académico de **Diseño de Software I** (Escuela Tecnológica Instituto Técnico Central, ETITC). Reúne la documentación del proyecto, un **simulador 3D** del control de acceso y un **prototipo con Arduino** cuya lógica se prueba en un computador.
 
