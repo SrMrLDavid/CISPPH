@@ -14,6 +14,7 @@ Proyecto académico de **Diseño de Software I** (Escuela Tecnológica Instituto
 | [`sistema-python/`](sistema-python/) | Programa de escritorio (CustomTkinter + OpenCV + face_recognition + SQLite) con reglas separadas en `nucleo.py` y puente opcional con Arduino | Reglas y puente con Arduino: 57 pruebas, 0 fallos. **Ventana, cámara, reconocimiento facial y Arduino físico sin probar** |
 | [`web/`](web/index.html) | Página del proyecto (cómo funciona, simulador 2D ligero con las reglas del de Godot, documentos). Un solo archivo HTML, copia en `docs/index.html` para GitHub Pages | Probada con un guion automático de 40 casos; GitHub Pages sin activar |
 | [`docs/documentos/`](docs/documentos/) | Documentos del proyecto en formato APA 7 (.docx / .xlsx) | Versión 2.1 |
+| [`docs/tablero/`](docs/tablero/GUIA_TABLERO_GITHUB.md) | Tareas del proyecto y script para crear el tablero en GitHub Projects | Script probado solo en modo simulación (`--dry-run`); sin ejecutar contra GitHub |
 | [`docs/uml/`](docs/uml/) | Fuentes PlantUML y imágenes de los diagramas | Generados con PlantUML |
 
 ## Cómo funciona el sistema
